@@ -1,7 +1,7 @@
 package message
 
 import (
-	"iso8583/padding"
+	"github.com/tomasdemarco/iso8583/padding"
 )
 
 func (m *Message) UnpackPadding(field string) (int, int) {

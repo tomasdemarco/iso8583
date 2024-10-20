@@ -1,3 +1,3 @@
-module iso8583
+module github.com/tomasdemarco/iso8583
 
 go 1.22

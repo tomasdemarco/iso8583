@@ -3,8 +3,8 @@ package message
 import (
 	"errors"
 	"fmt"
-	"iso8583/encoding"
-	"iso8583/packager"
+	"github.com/tomasdemarco/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/packager"
 	"sort"
 	"strconv"
 )

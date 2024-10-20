@@ -2,7 +2,7 @@ package message
 
 import (
 	"fmt"
-	"iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/encoding"
 	"strconv"
 )
 
