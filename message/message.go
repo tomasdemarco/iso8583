@@ -3,7 +3,7 @@ package message
 import (
 	"errors"
 	"fmt"
-	"iso8583/packager"
+	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
 	"sort"
 )

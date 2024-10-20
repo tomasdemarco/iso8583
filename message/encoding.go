@@ -2,7 +2,7 @@ package message
 
 import (
 	"errors"
-	"iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/encoding"
 )
 
 func (m *Message) UnpackEncoding(messageRaw string, field string, position int, length int) (value string, doubleLength int, err error) {

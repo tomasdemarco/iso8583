@@ -2,7 +2,7 @@ package encoding
 
 import (
 	"fmt"
-	"iso8583/utils"
+	"github.com/tomasdemarco/iso8583/utils"
 )
 
 var (
