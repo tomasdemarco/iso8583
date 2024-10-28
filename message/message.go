@@ -57,7 +57,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 
 	numberBitmaps, sliceBitmap, err := m.UnpackBitmap(positionInitial, messageRaw)
 	if err != nil {
-		err = errors.New("could not get bitmap")
+		err = errors.New("could not get bitmap, " + err.Error())
 		return err
 	}
 	m.Bitmap = sliceBitmap
