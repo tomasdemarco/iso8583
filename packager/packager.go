@@ -3,6 +3,7 @@ package packager
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -62,100 +63,32 @@ type HeaderFields struct {
 	InvertPrevious bool   `json:"invertPrevious"`
 }
 
-func LoadPackagers() (Packager, Packager, Packager, Packager) {
-	absPath, _ := filepath.Abs("./iso8583/packager/iso87BVisaBase1Packager.json")
+func LoadPackagers(file string) Packager {
+	absPath, _ := filepath.Abs("./iso8583/packager/" + file)
 	jsonFile, err := os.Open(absPath)
 	if err != nil {
 		fmt.Println(err)
 	}
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var packagerVisa Packager
-	json.Unmarshal(byteValue, &packagerVisa)
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	var pkg Packager
+	json.Unmarshal(byteValue, &pkg)
 	defer jsonFile.Close()
 
-	if packagerVisa.HeaderFile != "" {
-		packagerVisa.Header = LoadHeaders(packagerVisa.HeaderFile)
+	if pkg.HeaderFile != "" {
+		pkg.Header = LoadHeaders(pkg.HeaderFile)
 	}
 
-	for i, v := range packagerVisa.Fields {
+	for i, v := range pkg.Fields {
 		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
 			subFields := LoadSubfield(v.SubFieldsFile)
-			fields := packagerVisa.Fields[i]
+			fields := pkg.Fields[i]
 			fields.SubFields = subFields
-			packagerVisa.Fields[i] = fields
+			pkg.Fields[i] = fields
 		}
 	}
 
-	absPath, _ = filepath.Abs("./iso8583/packager/iso87EMasterPackager.json")
-	jsonFile, err = os.Open(absPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	byteValue, _ = ioutil.ReadAll(jsonFile)
-	var packagerMaster Packager
-	json.Unmarshal(byteValue, &packagerMaster)
-	defer jsonFile.Close()
-
-	if packagerMaster.HeaderFile != "" {
-		packagerMaster.Header = LoadHeaders(packagerMaster.HeaderFile)
-	}
-
-	for i, v := range packagerMaster.Fields {
-		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
-			subFields := LoadSubfield(v.SubFieldsFile)
-			fields := packagerMaster.Fields[i]
-			fields.SubFields = subFields
-			packagerMaster.Fields[i] = fields
-		}
-	}
-
-	absPath, _ = filepath.Abs("./iso8583/packager/iso87BPackager.json")
-	jsonFile, err = os.Open(absPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	byteValue, _ = ioutil.ReadAll(jsonFile)
-	var packagerGp Packager
-	json.Unmarshal(byteValue, &packagerGp)
-	defer jsonFile.Close()
-
-	if packagerGp.HeaderFile != "" {
-		packagerGp.Header = LoadHeaders(packagerGp.HeaderFile)
-	}
-
-	for i, v := range packagerGp.Fields {
-		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
-			subFields := LoadSubfield(v.SubFieldsFile)
-			field := packagerGp.Fields[i]
-			field.SubFields = subFields
-			packagerGp.Fields[i] = field
-		}
-	}
-
-	absPath, _ = filepath.Abs("./iso8583/packager/iso87BCabalPackager.json")
-	jsonFile, err = os.Open(absPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	byteValue, _ = ioutil.ReadAll(jsonFile)
-	var packagerCabal Packager
-	json.Unmarshal(byteValue, &packagerCabal)
-	defer jsonFile.Close()
-
-	if packagerCabal.HeaderFile != "" {
-		packagerCabal.Header = LoadHeaders(packagerCabal.HeaderFile)
-	}
-
-	for i, v := range packagerCabal.Fields {
-		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
-			subFields := LoadSubfield(v.SubFieldsFile)
-			field := packagerCabal.Fields[i]
-			field.SubFields = subFields
-			packagerCabal.Fields[i] = field
-		}
-	}
-
-	return packagerGp, packagerVisa, packagerMaster, packagerCabal
+	return pkg
 }
 
 func LoadHeaders(headerFile string) Header {
