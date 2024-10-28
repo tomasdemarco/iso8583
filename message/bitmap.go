@@ -31,6 +31,10 @@ func (m *Message) UnpackBitmap(positionInitial int, messageRaw string) (int, []s
 		if err != nil {
 			return 0, nil, err
 		}
+
+		if len(bitmapRaw) < m.Packager.Fields["001"].Length*2*numberBitmaps {
+			return 0, nil, errors.New("index out of range when trying to get bitmap")
+		}
 	} else if m.Packager.Fields["001"].Encoding == "EBCDIC" {
 		bitmapFirstChar, err := encoding.EbcdicDecode(messageRaw[positionInitial : positionInitial+2])
 		if err != nil {
@@ -50,6 +54,10 @@ func (m *Message) UnpackBitmap(positionInitial int, messageRaw string) (int, []s
 		if err != nil {
 			return 0, nil, err
 		}
+
+		if len(bitmapRaw) < m.Packager.Fields["001"].Length*2*numberBitmaps {
+			return 0, nil, errors.New("index out of range when trying to get bitmap")
+		}
 	} else {
 		validSecondBitmap, err := strconv.ParseInt(messageRaw[positionInitial:positionInitial+1], 16, 10)
 		if err != nil {
@@ -61,10 +69,10 @@ func (m *Message) UnpackBitmap(positionInitial int, messageRaw string) (int, []s
 		}
 
 		bitmapRaw = messageRaw[positionInitial : positionInitial+(16*numberBitmaps)]
-	}
 
-	if len(bitmapRaw) < m.Packager.Fields["001"].Length*numberBitmaps {
-		return 0, nil, errors.New("index out of range when trying to get bitmap")
+		if len(bitmapRaw) < m.Packager.Fields["001"].Length*numberBitmaps {
+			return 0, nil, errors.New("index out of range when trying to get bitmap")
+		}
 	}
 
 	sliceBitmap, err := encoding.BitmapDecode(bitmapRaw)
