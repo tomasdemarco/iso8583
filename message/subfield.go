@@ -25,7 +25,7 @@ func (m *Message) UnpackSubfields(field string, value string) {
 	}
 }
 
-func (m *Message) PackSubfields(fieldsAux map[string]Fields, field string) {
+func (m *Message) PackSubfields(fieldsAux map[string]Field, field string) {
 	var fieldResult string
 
 	keys := make([]string, 0, len(fieldsAux[field].SubFields))
@@ -44,24 +44,24 @@ func (m *Message) PackSubfields(fieldsAux map[string]Fields, field string) {
 
 func (m *Message) SetSubField(field string, subField string, value string) {
 
-	if m.FieldAndSubFields == nil {
-		var fields = make(map[string]Fields)
-		m.FieldAndSubFields = fields
+	if m.Fields == nil {
+		var fields = make(map[string]Field)
+		m.Fields = fields
 	}
-	fieldAux := m.FieldAndSubFields[field]
-	fieldAux.Field = ""
-	m.FieldAndSubFields[field] = fieldAux
-	fieldAux = m.FieldAndSubFields[field]
-	if m.FieldAndSubFields[field].SubFields == nil {
+	fieldAux := m.Fields[field]
+	fieldAux.Value = ""
+	m.Fields[field] = fieldAux
+	fieldAux = m.Fields[field]
+	if m.Fields[field].SubFields == nil {
 		var subFields = make(map[string]string)
 		fieldAux.SubFields = subFields
 	}
 	fieldAux.SubFields[subField] = value
-	m.FieldAndSubFields[field] = fieldAux
+	m.Fields[field] = fieldAux
 }
 
 func (m *Message) GetSubField(field string, subField string) (value string, err error) {
-	if value, ok := m.FieldAndSubFields[field].SubFields[subField]; ok {
+	if value, ok := m.Fields[field].SubFields[subField]; ok {
 		return value, nil
 	}
 	err = errors.New("the message does not contain with the id field'" + field + "', the subfield with the id '" + subField + "'")

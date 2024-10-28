@@ -15,7 +15,7 @@ func TestDecodeAscii(t *testing.T) {
 	}
 
 	if result != expectedResult {
-		t.Fatalf(`AsciiDecode(%s) - Result %s does not match "%s"`, data, result, expectedResult)
+		t.Fatalf(`AsciiDecode(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
 	}
 }
 
@@ -26,6 +26,6 @@ func TestEncodeAscii(t *testing.T) {
 
 	result := AsciiEncode(data)
 	if result != expectedResult {
-		t.Fatalf(`AsciiEncode(%s) - Result %s does not match "%s"`, data, result, expectedResult)
+		t.Fatalf(`AsciiEncode(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
 	}
 }

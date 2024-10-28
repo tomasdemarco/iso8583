@@ -62,12 +62,12 @@ func (m *Message) PackHeaderResponse(packager *packager.Packager) (header string
 }
 
 func UnpackLength(messageRaw []byte) (length int, err error) {
-	length64, err := strconv.ParseInt(fmt.Sprintf("%x", messageRaw[:2]), 16, 64)
+	length64, err := strconv.ParseInt(fmt.Sprintf("%x", messageRaw[:2]), 16, 32)
 	length = int(length64)
 	return length, err
 }
 
 func PackLength(messageRaw string, headerLength int) (lengthHex string) {
-	lengthHex = encoding.HexEncode(fmt.Sprintf("%d", (len(messageRaw)+headerLength)/2))
+	lengthHex, _ = encoding.HexEncode(fmt.Sprintf("%d", (len(messageRaw)+headerLength)/2))
 	return fmt.Sprintf("%04s", lengthHex)
 }

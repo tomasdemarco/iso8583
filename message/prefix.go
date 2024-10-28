@@ -16,53 +16,31 @@ func (m *Message) UnpackPrefix(field string, messageRaw string, position int, pr
 		lengthString, err := encoding.AsciiDecode(messageRaw[position : position+(prefixLengthAux*2)])
 		length, err := strconv.Atoi(lengthString)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
-		return length * 2, prefixLengthAux * 2
+		return length, prefixLengthAux * 2
 	case "HEX":
-		if m.Packager.Fields[field].Type == "STRING" {
-			lengthString := encoding.HexDecode(messageRaw[position : position+prefixLength])
-			length, err := strconv.Atoi(lengthString)
-			if err != nil {
-				panic(err)
-			}
-			return length * 2, prefixLength
-		} else {
-			lengthString := encoding.HexDecode(messageRaw[position : position+prefixLength])
-			length, err := strconv.Atoi(lengthString)
-			if err != nil {
-				panic(err)
-			}
-			return length, prefixLength
+		lengthString, _ := encoding.HexDecode(messageRaw[position : position+prefixLength])
+		length, err := strconv.Atoi(lengthString)
+		if err != nil {
+			fmt.Println(err)
 		}
+		return length, prefixLength
 	case "EBCDIC":
-		if m.Packager.Fields[field].Type == "STRING" {
-			prefixLengthAux := prefixLength
-			if prefixLengthAux == 4 {
-				prefixLengthAux--
-			}
-			lengthString, _ := encoding.EbcdicDecode(messageRaw[position : position+(prefixLengthAux*2)])
-			length, err := strconv.Atoi(lengthString)
-			if err != nil {
-				panic(err)
-			}
-			return length * 2, prefixLengthAux * 2
-		} else {
-			prefixLengthAux := prefixLength
-			if prefixLengthAux == 4 {
-				prefixLengthAux--
-			}
-			lengthString, _ := encoding.EbcdicDecode(messageRaw[position : position+(prefixLengthAux*2)])
-			length, err := strconv.Atoi(lengthString)
-			if err != nil {
-				panic(err)
-			}
-			return length, prefixLengthAux * 2
+		prefixLengthAux := prefixLength
+		if prefixLengthAux == 4 {
+			prefixLengthAux--
 		}
+		lengthString, _ := encoding.EbcdicDecode(messageRaw[position : position+(prefixLengthAux*2)])
+		length, err := strconv.Atoi(lengthString)
+		if err != nil {
+			fmt.Println(err)
+		}
+		return length, prefixLengthAux * 2
 	default:
 		length, err := strconv.Atoi(messageRaw[position : position+prefixLength])
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 		return length, prefixLength
 	}
@@ -78,38 +56,26 @@ func (m *Message) PackPrefix(field string, value int, prefixLength int) (prefix 
 		}
 		return prefix
 	case "HEX":
-		if m.Packager.Fields[field].Type == "STRING" {
-			if prefixLength == 4 {
-				prefix = encoding.HexEncode(fmt.Sprintf("%04d", value/2))
-			} else {
-				prefix = encoding.HexEncode(fmt.Sprintf("%02d", value/2))
-			}
-			return prefix
+		if prefixLength == 4 {
+			prefix, _ = encoding.HexEncode(fmt.Sprintf("%d", value))
+			prefix = fmt.Sprintf("%04s", prefix)
 		} else {
-			if prefixLength == 4 {
-				prefix = encoding.HexEncode(fmt.Sprintf("%04d", value))
-			} else {
-				prefix = encoding.HexEncode(fmt.Sprintf("%02d", value))
-			}
-			return prefix
+			prefix, _ = encoding.HexEncode(fmt.Sprintf("%d", value))
+			prefix = fmt.Sprintf("%02s", prefix)
 		}
+		return prefix
 	case "EBCDIC":
-		if m.Packager.Fields[field].Type == "STRING" {
-			if prefixLength == 4 {
-				prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%03d", value/2))
-			} else {
-				prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%02d", value/2))
-			}
-			return prefix
+		if prefixLength == 4 {
+			prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%03d", value))
 		} else {
-			if prefixLength == 4 {
-				prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%03d", value))
-			} else {
-				prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%02d", value))
-			}
-			return prefix
+			prefix, _ = encoding.EbcdicEncode(fmt.Sprintf("%02d", value))
 		}
+		return prefix
 	default:
-		return fmt.Sprintf("%d", value)
+		if prefixLength == 4 {
+			return fmt.Sprintf("%04d", value)
+		} else {
+			return fmt.Sprintf("%02d", value)
+		}
 	}
 }

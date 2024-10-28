@@ -111,11 +111,11 @@ func (m *Message) UnpackField(messageRaw string, position int, field string) (le
 func (m *Message) PackField(field string) (fieldEncode string) {
 	switch m.Packager.Fields[field].Prefix {
 	case "LL":
-		fieldPrefix := m.PackPrefix(field, len(m.FieldAndSubFields[field].Field), 2)
+		fieldPrefix := m.PackPrefix(field, len(m.Fields[field].Value), 2)
 
 		padRight, padLeft := m.PackPadding(field)
 		if m.Packager.Fields[field].Padding.Type != "PARITY" {
-			m.SetField(field, padLeft+m.FieldAndSubFields[field].Field+padRight)
+			m.SetField(field, padLeft+m.Fields[field].Value+padRight)
 			fieldEncode = m.PackEncoding(field, "", "")
 		} else {
 			fieldEncode = m.PackEncoding(field, padRight, padLeft)
@@ -123,11 +123,11 @@ func (m *Message) PackField(field string) (fieldEncode string) {
 
 		return fmt.Sprintf("%02s", fieldPrefix) + fieldEncode
 	case "LLL":
-		fieldPrefix := m.PackPrefix(field, len(m.FieldAndSubFields[field].Field), 4)
+		fieldPrefix := m.PackPrefix(field, len(m.Fields[field].Value), 4)
 
 		padRight, padLeft := m.PackPadding(field)
 		if m.Packager.Fields[field].Padding.Type != "PARITY" {
-			m.SetField(field, padLeft+m.FieldAndSubFields[field].Field+padRight)
+			m.SetField(field, padLeft+m.Fields[field].Value+padRight)
 			fieldEncode = m.PackEncoding(field, "", "")
 		} else {
 			fieldEncode = m.PackEncoding(field, padRight, padLeft)
@@ -137,7 +137,7 @@ func (m *Message) PackField(field string) (fieldEncode string) {
 	default:
 		padRight, padLeft := m.PackPadding(field)
 		if m.Packager.Fields[field].Padding.Type != "PARITY" {
-			m.SetField(field, padLeft+m.FieldAndSubFields[field].Field+padRight)
+			m.SetField(field, padLeft+m.Fields[field].Value+padRight)
 			fieldEncode = m.PackEncoding(field, "", "")
 		} else {
 			fieldEncode = m.PackEncoding(field, padRight, padLeft)
@@ -148,18 +148,18 @@ func (m *Message) PackField(field string) (fieldEncode string) {
 }
 
 func (m *Message) SetField(field string, value string) {
-	if m.FieldAndSubFields == nil {
-		var fields = make(map[string]Fields)
-		m.FieldAndSubFields = fields
+	if m.Fields == nil {
+		var fields = make(map[string]Field)
+		m.Fields = fields
 	}
-	fieldAux := m.FieldAndSubFields[field]
-	fieldAux.Field = value
-	m.FieldAndSubFields[field] = fieldAux
+	fieldAux := m.Fields[field]
+	fieldAux.Value = value
+	m.Fields[field] = fieldAux
 }
 
 func (m *Message) GetField(field string) (value string, err error) {
-	if _, ok := m.FieldAndSubFields[field]; ok {
-		return m.FieldAndSubFields[field].Field, nil
+	if _, ok := m.Fields[field]; ok {
+		return m.Fields[field].Value, nil
 	}
 	err = errors.New("the message does not contain the field with the id '" + field + "'")
 	return value, err

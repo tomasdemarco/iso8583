@@ -15,7 +15,7 @@ func TestEbcdicDecode(t *testing.T) {
 	}
 
 	if result != expectedResult {
-		t.Fatalf(`EbcdicDecode(%s) - Result %s does not match "%s"`, data, result, expectedResult)
+		t.Fatalf(`EbcdicDecode(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
 	}
 }
 
@@ -30,6 +30,6 @@ func TestEbcdicEncode(t *testing.T) {
 	}
 
 	if result != expectedResult {
-		t.Fatalf(`EbcdicEncode(%s) - Result %s does not match "%s"`, data, result, expectedResult)
+		t.Fatalf(`EbcdicEncode(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
 	}
 }
