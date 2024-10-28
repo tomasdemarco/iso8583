@@ -20,7 +20,7 @@ func (m *Message) UnpackPadding(field string) (int, int) {
 func (m *Message) PackPadding(field string) (string, string) {
 	typePad := m.Packager.Fields[field].Padding.Type
 	pad := m.Packager.Fields[field].Padding.Pad
-	lengthMessage := len(m.FieldAndSubFields[field].Field)
+	lengthMessage := len(m.Fields[field].Value)
 	lengthPackager := m.Packager.Fields[field].Length
 	switch m.Packager.Fields[field].Padding.Position {
 	case "RIGHT":

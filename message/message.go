@@ -2,23 +2,22 @@ package message
 
 import (
 	"errors"
-	"fmt"
 	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
 	"sort"
 )
 
 type Message struct {
-	Packager          *packager.Packager
-	Length            int
-	Header            map[string]string
-	Bitmap            []string
-	FieldAndSubFields map[string]Fields
-	TagsEmv           map[string]string
+	Packager *packager.Packager
+	Length   int
+	Header   map[string]string
+	Bitmap   []string
+	Fields   map[string]Field
+	TagsEmv  map[string]string
 }
 
-type Fields struct {
-	Field     string
+type Field struct {
+	Value     string
 	SubFields map[string]string
 }
 
@@ -40,7 +39,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 	}
 	positionInitial := length
 
-	match, _ := regexp.MatchString(m.Packager.Fields["000"].Pattern, m.FieldAndSubFields["000"].Field)
+	match, _ := regexp.MatchString(m.Packager.Fields["000"].Pattern, m.Fields["000"].Value)
 	if !match {
 		err = errors.New("invalid format in field 000")
 		return err
@@ -65,7 +64,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 
 	position := positionInitial + m.Packager.Fields["001"].Length*numberBitmaps
 	m.SetField("001", messageRaw[positionInitial:positionInitial+m.Packager.Fields["001"].Length*numberBitmaps])
-	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.FieldAndSubFields["001"].Field)
+	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.Fields["001"].Value)
 	if !match {
 		err = errors.New("invalid format in field 001")
 		return err
@@ -84,28 +83,28 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 }
 
 func (m *Message) Pack() (message string, err error) {
-	sliceBitmap := make([]string, 0)
-	for k := range m.FieldAndSubFields {
-		str := fmt.Sprintf("%03s", k)
-		sliceBitmap = append(sliceBitmap, str)
-	}
-	sort.Strings(sliceBitmap)
-	m.Bitmap = sliceBitmap
-	m.SetField("001", m.PackBitmap())
 
-	keys := make([]string, 0, len(m.FieldAndSubFields))
-	for k := range m.FieldAndSubFields {
+	bitmap, err := m.PackBitmap()
+	if err != nil {
+		return message, err
+	}
+
+	m.SetField("001", bitmap)
+
+	keys := make([]string, 0, len(m.Fields))
+	for k := range m.Fields {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
-	fieldsAux := m.FieldAndSubFields
-	m.FieldAndSubFields = nil
+	fieldsAux := m.Fields
+	m.Fields = nil
+
 	for _, k := range keys {
 		if fieldsAux[k].SubFields != nil {
 			m.PackSubfields(fieldsAux, k)
 		} else {
-			m.SetField(k, fieldsAux[k].Field)
+			m.SetField(k, fieldsAux[k].Value)
 		}
 	}
 
