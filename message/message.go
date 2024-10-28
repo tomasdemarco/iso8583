@@ -37,7 +37,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 	if err != nil {
 		return err
 	}
-	positionInitial := length
+	position := length
 
 	match, _ := regexp.MatchString(m.Packager.Fields["000"].Pattern, m.Fields["000"].Value)
 	if !match {
@@ -50,20 +50,21 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 		return err
 	}
 
-	if len(messageRaw) < positionInitial+m.Packager.Fields["001"].Length {
+	if len(messageRaw) < position+m.Packager.Fields["001"].Length {
 		err = errors.New("the message is too short to be unpacked")
 		return err
 	}
 
-	lengthBitmap, sliceBitmap, err := m.UnpackBitmap(positionInitial, messageRaw)
+	lengthBitmap, sliceBitmap, err := m.UnpackBitmap(position, messageRaw)
 	if err != nil {
 		err = errors.New("could not get bitmap, " + err.Error())
 		return err
 	}
 	m.Bitmap = sliceBitmap
 
-	position := positionInitial + lengthBitmap
-	m.SetField("001", messageRaw[positionInitial:position])
+	m.SetField("001", messageRaw[position:lengthBitmap])
+
+	position += lengthBitmap
 
 	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.Fields["001"].Value)
 	if !match {
