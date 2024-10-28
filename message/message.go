@@ -2,6 +2,7 @@ package message
 
 import (
 	"errors"
+	"fmt"
 	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
 	"sort"
@@ -60,6 +61,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 		err = errors.New("could not get bitmap, " + err.Error())
 		return err
 	}
+	fmt.Println("LEN BITMAP", lengthBitmap)
 	m.Bitmap = sliceBitmap
 
 	m.SetField("001", messageRaw[position:lengthBitmap])
