@@ -2,7 +2,6 @@ package message
 
 import (
 	"errors"
-	"fmt"
 	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
 	"sort"
@@ -33,13 +32,13 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 		err = errors.New("packager does not contain field 000")
 		return err
 	}
-	fmt.Println(messageRaw)
+
 	length, err := m.UnpackField(messageRaw, 0, "000")
 	if err != nil {
 		return err
 	}
 	positionInitial := length
-	fmt.Println(m.Fields)
+
 	match, _ := regexp.MatchString(m.Packager.Fields["000"].Pattern, m.Fields["000"].Value)
 	if !match {
 		err = errors.New("invalid format in field 000")
