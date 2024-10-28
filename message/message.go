@@ -55,15 +55,16 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 		return err
 	}
 
-	numberBitmaps, sliceBitmap, err := m.UnpackBitmap(positionInitial, messageRaw)
+	lengthBitmap, sliceBitmap, err := m.UnpackBitmap(positionInitial, messageRaw)
 	if err != nil {
 		err = errors.New("could not get bitmap, " + err.Error())
 		return err
 	}
 	m.Bitmap = sliceBitmap
 
-	position := positionInitial + m.Packager.Fields["001"].Length*numberBitmaps
-	m.SetField("001", messageRaw[positionInitial:positionInitial+m.Packager.Fields["001"].Length*numberBitmaps])
+	position := positionInitial + lengthBitmap
+	m.SetField("001", messageRaw[positionInitial:position])
+
 	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.Fields["001"].Value)
 	if !match {
 		err = errors.New("invalid format in field 001")
