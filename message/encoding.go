@@ -21,6 +21,12 @@ func (m *Message) UnpackEncoding(messageRaw string, field string, position int, 
 		}
 		result, _ := encoding.EbcdicDecode(messageRaw[position : position+(length*2)])
 		return result, 2, nil
+	case "ANS":
+		if len(messageRaw) < position+(length*2) {
+			err = errors.New("index out of range while trying to unpack field " + field)
+			return "", 0, err
+		}
+		return messageRaw[position : position+(length*2)], 2, nil
 	default:
 		if len(messageRaw) < position+length {
 			err = errors.New("index out of range while trying to unpack field " + field)
