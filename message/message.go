@@ -66,7 +66,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 
 	m.SetField("001", messageRaw[position:position+lengthBitmap])
 
-	position += lengthBitmap
+	position += position + lengthBitmap
 
 	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.Fields["001"].Value)
 	if !match {
