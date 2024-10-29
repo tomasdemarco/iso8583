@@ -64,7 +64,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 	fmt.Println("LEN BITMAP", lengthBitmap)
 	m.Bitmap = sliceBitmap
 
-	m.SetField("001", messageRaw[position:lengthBitmap])
+	m.SetField("001", messageRaw[position:position+lengthBitmap])
 
 	position += lengthBitmap
 
