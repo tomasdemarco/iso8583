@@ -2,9 +2,9 @@ package packager
 
 import (
 	"encoding/json"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/encoding"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/padding"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/prefix"
+	"github.com/tomasdemarco/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/padding"
+	"github.com/tomasdemarco/iso8583/prefix"
 	"io"
 	"os"
 	"path/filepath"

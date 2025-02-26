@@ -3,8 +3,8 @@ package message
 import (
 	"errors"
 	"fmt"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/field"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/packager"
+	"github.com/tomasdemarco/iso8583/field"
+	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
 	"sort"
 )

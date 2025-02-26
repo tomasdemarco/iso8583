@@ -2,7 +2,7 @@ package encoding
 
 import (
 	"fmt"
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/utils"
+	"github.com/tomasdemarco/iso8583/utils"
 )
 
 var (

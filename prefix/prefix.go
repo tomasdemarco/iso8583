@@ -2,7 +2,7 @@ package prefix
 
 import (
 	"fmt"
-	enc "gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/encoding"
+	enc "github.com/tomasdemarco/iso8583/encoding"
 	"strconv"
 )
 

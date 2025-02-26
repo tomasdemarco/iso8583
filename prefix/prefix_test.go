@@ -1,7 +1,7 @@
 package prefix
 
 import (
-	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/encoding"
 	"testing"
 )
 
