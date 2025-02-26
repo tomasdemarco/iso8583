@@ -1,0 +1,155 @@
+package packager
+
+import (
+	"encoding/json"
+	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/encoding"
+	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/padding"
+	"gitlab.com/g6604/adquirencia/desarrollo/golang_package/iso8583/prefix"
+	"io"
+	"os"
+	"path/filepath"
+)
+
+type Packager struct {
+	Name           string            `json:"name"`
+	PrefixLength   int               `json:"prefixLength"`
+	PrefixEncoding encoding.Encoding `json:"prefixEncoding"`
+	HeaderLength   int               `json:"headerLength"`
+	Header         Header            `json:"header"`
+	HeaderFile     string            `json:"headerFile"`
+	Fields         map[string]Field  `json:"fields"`
+}
+
+type Field struct {
+	Type            string              `json:"type"`
+	Length          int                 `json:"length"`
+	Pattern         string              `json:"pattern"`
+	Name            string              `json:"name"`
+	Encoding        encoding.Encoding   `json:"encoding"`
+	Prefix          prefix.Prefix       `json:"prefix"`
+	Padding         padding.Padding     `json:"padding"`
+	SubFieldsFile   string              `json:"subFieldsFile"`
+	SubFieldsFormat string              `json:"subFieldsFormat"`
+	SubFields       map[string]SubField `json:"subFields"`
+}
+
+type SubField struct {
+	Type           string            `json:"type"`
+	Length         int               `json:"length"`
+	Pattern        string            `json:"pattern"`
+	Name           string            `json:"name"`
+	Encoding       encoding.Encoding `json:"encoding"`
+	Prefix         string            `json:"prefix"`
+	PrefixEncoding string            `json:"prefixEncoding"`
+	Padding        *padding.Padding  `json:"padding"`
+}
+
+type Header struct {
+	Name         string                  `json:"name"`
+	HeaderFields map[string]HeaderFields `json:"headerFields"`
+}
+
+type HeaderFields struct {
+	Name           string `json:"name"`
+	Length         int    `json:"length"`
+	DefaultValue   string `json:"defaultValue"`
+	InRequest      bool   `json:"inRequest"`
+	InvertPrevious bool   `json:"invertPrevious"`
+}
+
+func LoadPackager(path, file string) (pkg Packager, err error) {
+	absPath, err := filepath.Abs(path + "/" + file)
+	if err != nil {
+		return pkg, err
+	}
+
+	jsonFile, err := os.Open(absPath)
+	if err != nil {
+		return pkg, err
+	}
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return pkg, err
+	}
+
+	err = json.Unmarshal(byteValue, &pkg)
+	if err != nil {
+		return pkg, err
+	}
+	defer jsonFile.Close()
+
+	if pkg.HeaderFile != "" {
+		pkg.Header, err = LoadHeader(path, pkg.HeaderFile)
+		if err != nil {
+			return pkg, err
+		}
+	}
+
+	for i, v := range pkg.Fields {
+		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
+			subFields, err := LoadSubfields(path, v.SubFieldsFile)
+			if err != nil {
+				return pkg, err
+			}
+
+			fields := pkg.Fields[i]
+			fields.SubFields = subFields
+			pkg.Fields[i] = fields
+		}
+	}
+
+	return pkg, nil
+}
+
+func LoadHeader(path, file string) (header Header, err error) {
+	absPath, err := filepath.Abs(path + "/" + file)
+	if err != nil {
+		return header, err
+	}
+
+	jsonFile, err := os.Open(absPath)
+	if err != nil {
+		return header, err
+	}
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return header, err
+	}
+
+	err = json.Unmarshal(byteValue, &header)
+	if err != nil {
+		return header, err
+	}
+
+	defer jsonFile.Close()
+
+	return header, nil
+}
+
+func LoadSubfields(path, file string) (subFields map[string]SubField, err error) {
+	absPath, err := filepath.Abs(path + "/" + file)
+	if err != nil {
+		return subFields, err
+	}
+
+	jsonFile, err := os.Open(absPath)
+	if err != nil {
+		return subFields, err
+	}
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return subFields, err
+	}
+
+	err = json.Unmarshal(byteValue, &subFields)
+	if err != nil {
+		return subFields, err
+	}
+
+	defer jsonFile.Close()
+
+	return subFields, nil
+}

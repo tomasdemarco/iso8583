@@ -1,0 +1,26 @@
+stages:
+  - release
+
+tag-release:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+  script:
+    - apk add curl git python3 wget
+    - git log -1 --pretty=%B > last_commit.txt # Último mensaje del commit
+    - export LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0") # Última etiqueta en el repositorio
+    - curl --header "PRIVATE-TOKEN:${VERSIONADO_TOKEN}" "https://gitlab.com/api/v4/projects/64536990/repository/files/next_version.py/raw?ref=main" -o next_version.py
+    - echo $(cat last_commit.txt)
+    - echo $LAST_TAG
+    - echo $(cat next_version.py)
+    - export NEXT_TAG=$(python3 next_version.py ${LAST_TAG} "$(cat last_commit.txt)") # Nueva etiqueta
+    - echo Pushing new version tag ${NEXT_TAG}
+
+    - | 
+        if [[ "${NEXT_TAG}" != "0" ]]; then
+          curl -k --request POST --header "PRIVATE-TOKEN:${TAG_TOKEN}" --url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${NEXT_TAG}&ref=main"
+        elif [[ "${NEXT_TAG}" == "0" ]]; then
+          echo "No hay tag que sumar"
+        fi
+  tags:
+    - runner-amb-bajos

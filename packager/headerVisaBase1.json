@@ -1,0 +1,103 @@
+{
+    "name": "headerVisaBase1",
+    "headerFields": {
+        "01": {
+            "name": "Header Length",
+            "length": 2,
+            "defaultValue": "16",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "02": {
+            "name": "Header Flag and Format",
+            "length": 2,
+            "defaultValue": "01",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "03": {
+            "name": "Text Format",
+            "length": 2,
+            "defaultValue": "02",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "04": {
+            "name": "Total Message Length",
+            "length": 4,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "05": {
+            "name": "Destination Station ID",
+            "length": 6,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "06": {
+            "name": "Source Station ID",
+            "length": 6,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": true
+        },
+        "07": {
+            "name": "Round-Trip Control Information",
+            "length": 2,
+            "defaultValue": "00",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "08": {
+            "name": "V.I.P. Flags",
+            "length": 2,
+            "defaultValue": "0000",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "09": {
+            "name": "Message Status Flags",
+            "length": 2,
+            "defaultValue": "000000",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "10": {
+            "name": "Batch Number",
+            "length": 2,
+            "defaultValue": "00",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "11": {
+            "name": "Reserved",
+            "length": 2,
+            "defaultValue": "000000",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "12": {
+            "name": "User Information",
+            "length": 2,
+            "defaultValue": "00",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "13": {
+            "name": "Bitmap",
+            "length": 2,
+            "defaultValue": null,
+            "inRequest": false,
+            "invertPrevious": false
+        },
+        "14": {
+            "name": "Bitmap, Reject Data Group",
+            "length": 2,
+            "defaultValue": null,
+            "inRequest": false,
+            "invertPrevious": false
+        }
+    }
+}

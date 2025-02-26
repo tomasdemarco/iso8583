@@ -1,0 +1,47 @@
+{
+    "name": "headerCabal",
+    "headerFields": {
+        "00": {
+            "name": "Start Message",
+            "length": 3,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "01": {
+            "name": "Product Indicator",
+            "length": 2,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "02": {
+            "name": "Software Version",
+            "length": 2,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "03": {
+            "name": "state",
+            "length": 3,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "04": {
+            "name": "Origin Request",
+            "length": 1,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "05": {
+            "name": "Origin Response",
+            "length": 1,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        }
+    }
+}

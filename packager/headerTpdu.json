@@ -1,0 +1,26 @@
+{
+    "name": "headerTpdu",
+    "headerFields": {
+        "01": {
+            "name": "Message ID",
+            "length": 2,
+            "defaultValue": "60",
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "02": {
+            "name": "Destination ID",
+            "length": 4,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": false
+        },
+        "03": {
+            "name": "Source ID",
+            "length": 4,
+            "defaultValue": null,
+            "inRequest": true,
+            "invertPrevious": true
+        }
+    }
+}
