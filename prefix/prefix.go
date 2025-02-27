@@ -12,6 +12,9 @@ type Prefix struct {
 }
 
 func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
+	if prefix.Type == Fixed {
+		return 0, 0, nil
+	}
 
 	prefixLength := GetPrefixLen(prefix.Type, prefix.Encoding)
 
@@ -55,8 +58,15 @@ func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
 }
 
 func Pack(prefix Prefix, value int) (string, error) {
+	if prefix.Type == Fixed {
+		return "", nil
+	}
+
 	switch prefix.Encoding {
 	case enc.Ascii:
+		if prefix.Type == LLLL {
+			return enc.AsciiEncode(fmt.Sprintf("%04d", value)), nil
+		}
 		if prefix.Type == LLL {
 			return enc.AsciiEncode(fmt.Sprintf("%03d", value)), nil
 		} else {
@@ -64,38 +74,45 @@ func Pack(prefix Prefix, value int) (string, error) {
 		}
 	case enc.Hex:
 		if prefix.Type == LLL {
-			prefix, err := enc.HexEncode(fmt.Sprintf("%d", value))
+			valueEnc, err := enc.HexEncode(fmt.Sprintf("%d", value))
 			if err != nil {
 				return "", err
 			}
 
-			return fmt.Sprintf("%04s", prefix), nil
+			return fmt.Sprintf("%04s", valueEnc), nil
 		} else {
-			prefix, err := enc.HexEncode(fmt.Sprintf("%d", value))
+			valueEnc, err := enc.HexEncode(fmt.Sprintf("%d", value))
 			if err != nil {
 				return "", err
 			}
 
-			return fmt.Sprintf("%02s", prefix), nil
+			return fmt.Sprintf("%02s", valueEnc), nil
 		}
 	case enc.Ebcdic:
-		if prefix.Type == LLL {
-			prefix, err := enc.EbcdicEncode(fmt.Sprintf("%03d", value))
+		if prefix.Type == LLLL {
+			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%04d", value))
 			if err != nil {
 				return "", err
 			}
 
-			return prefix, nil
+			return valueEnc, nil
+		} else if prefix.Type == LLL {
+			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%03d", value))
+			if err != nil {
+				return "", err
+			}
+
+			return valueEnc, nil
 		} else {
-			prefix, err := enc.EbcdicEncode(fmt.Sprintf("%02d", value))
+			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%02d", value))
 			if err != nil {
 				return "", err
 			}
 
-			return prefix, nil
+			return valueEnc, nil
 		}
 	default:
-		if prefix.Type == LLL {
+		if prefix.Type == LLL || prefix.Type == LLLL {
 			return fmt.Sprintf("%04d", value), nil
 		} else {
 			return fmt.Sprintf("%02d", value), nil
@@ -109,6 +126,8 @@ func GetPrefixLen(prefixType Type, prefixEncoding enc.Encoding) int {
 	case LL:
 		length = 2
 	case LLL:
+		length = 4
+	case LLLL:
 		length = 4
 	default:
 		length = 2

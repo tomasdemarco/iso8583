@@ -11,12 +11,14 @@ const (
 	Fixed Type = iota
 	LL
 	LLL
+	LLLL
 )
 
 var prefixStrings = [...]string{
 	Fixed: "FIXED",
 	LL:    "LL",
 	LLL:   "LLL",
+	LLLL:  "LLLL",
 }
 
 // String return string

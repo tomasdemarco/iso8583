@@ -1,62 +1,56 @@
 {
     "00": {
+        "name": "Bitmap",
         "type": "STRING",
         "length": 6,
         "pattern": "^{6}$",
-        "name": "Bitmap",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "01": {
+        "name": "Network ID",
         "type": "STRING",
         "length": 4,
         "pattern": "^{4}$",
-        "name": "Network ID",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "02": {
+        "name": "Time (Preauth Time Limit)",
         "type": "STRING",
         "length": 4,
         "pattern": "^{4}$",
-        "name": "Time (Preauth Time Limit)",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "03": {
+        "name": "Message Reason Code",
         "type": "STRING",
         "length": 4,
         "pattern": "^{4}$",
-        "name": "Message Reason Code",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "04": {
+        "name": "STIP/Switch Reason Code",
         "type": "STRING",
         "length": 4,
         "pattern": "^{2}$",
-        "name": "STIP/Switch Reason Code",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "19": {
+        "name": "Fee Program indicator",
         "type": "STRING",
         "length": 6,
         "pattern": "^{6}$",
-        "name": "Fee Program indicator",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     }
 }

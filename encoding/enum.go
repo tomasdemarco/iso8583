@@ -8,18 +8,19 @@ import (
 type Encoding int
 
 const (
-	Ascii Encoding = iota
-	Bcd
+	Bcd Encoding = iota
+	Ascii
 	Ebcdic
 	Hex
 	Ans
 )
 
 var encodingStrings = [...]string{
-	Ascii:  "ASCII",
 	Bcd:    "BCD",
+	Ascii:  "ASCII",
 	Ebcdic: "EBCDIC",
 	Hex:    "HEX",
+	Ans:    "ANS",
 }
 
 // String return string

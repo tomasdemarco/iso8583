@@ -3,6 +3,7 @@ package message
 import (
 	"errors"
 	"fmt"
+	"github.com/tomasdemarco/iso8583/bitmap"
 	"github.com/tomasdemarco/iso8583/field"
 	"github.com/tomasdemarco/iso8583/packager"
 	"regexp"
@@ -54,7 +55,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 		return err
 	}
 
-	lengthBitmap, sliceBitmap, err := m.UnpackBitmap(position, messageRaw)
+	lengthBitmap, sliceBitmap, err := bitmap.Unpack(m.Packager.Fields["001"], position, messageRaw)
 	if err != nil {
 		err = errors.New("could not get bitmap, " + err.Error())
 		return err
@@ -74,7 +75,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 
 	for _, fieldId := range m.Bitmap {
 		if fieldId != "001" {
-			value, length, err := field.Unpack(m.Packager.Fields[fieldId], messageRaw, position, fieldId)
+			value, length, err = field.Unpack(m.Packager.Fields[fieldId], messageRaw, position, fieldId)
 			if err != nil {
 				return err
 			}
@@ -83,17 +84,20 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 			position += *length
 		}
 	}
+
 	return nil
 }
 
 func (m *Message) Pack() (message string, err error) {
 
-	bitmap, err := m.PackBitmap()
+	bitmapSlice, bitmapString, err := bitmap.Pack(m.Fields)
 	if err != nil {
-		return message, err
+		return "", err
 	}
 
-	m.SetField("001", bitmap)
+	m.Bitmap = bitmapSlice
+
+	m.SetField("001", *bitmapString)
 
 	keys := make([]string, 0, len(m.Fields))
 	for k := range m.Fields {
@@ -105,16 +109,22 @@ func (m *Message) Pack() (message string, err error) {
 	m.Fields = nil
 
 	for _, k := range keys {
+		value := fieldsAux[k].Value
+
 		if fieldsAux[k].SubFields != nil {
-			m.PackSubfields(fieldsAux, k)
-		} else {
-			m.SetField(k, fieldsAux[k].Value)
+			fieldAux := fieldsAux[k]
+			value = fieldAux.PackSubfields(m.Packager.Fields[k].SubFields)
 		}
+
+		m.SetField(k, value)
 	}
 
-	for i := 0; i < len(keys); i++ {
-		fieldEncode := field.Pack(m.Packager.Fields[fmt.Sprintf("%03d", i)], keys[i])
-		m.SetField(fmt.Sprintf("%03d", i), fieldEncode)
+	for _, k := range keys {
+		fieldEncode, errPack := field.Pack(m.Packager.Fields[k], m.Fields[k].Value)
+		if errPack != nil {
+			return "", errPack
+		}
+		//m.SetField(k, fieldEncode) //TODO creo que no hace falta
 		message += fieldEncode
 	}
 
@@ -135,6 +145,6 @@ func (m *Message) GetField(fieldId string) (value string, err error) {
 	if _, ok := m.Fields[fieldId]; ok {
 		return m.Fields[fieldId].Value, nil
 	}
-	err = errors.New("the message does not contain the field with the id '" + fieldId + "'")
-	return value, err
+
+	return "", errors.New(fmt.Sprintf(`the message does not contain the field with the id "%s"`, fieldId))
 }

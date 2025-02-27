@@ -21,27 +21,25 @@ type Packager struct {
 }
 
 type Field struct {
-	Type            string              `json:"type"`
-	Length          int                 `json:"length"`
-	Pattern         string              `json:"pattern"`
-	Name            string              `json:"name"`
-	Encoding        encoding.Encoding   `json:"encoding"`
-	Prefix          prefix.Prefix       `json:"prefix"`
-	Padding         padding.Padding     `json:"padding"`
-	SubFieldsFile   string              `json:"subFieldsFile"`
-	SubFieldsFormat string              `json:"subFieldsFormat"`
-	SubFields       map[string]SubField `json:"subFields"`
+	Name          string              `json:"name"`
+	Type          string              `json:"type"`
+	Length        int                 `json:"length"`
+	Pattern       string              `json:"pattern"`
+	Encoding      encoding.Encoding   `json:"encoding"`
+	Prefix        prefix.Prefix       `json:"prefix"`
+	Padding       padding.Padding     `json:"padding"`
+	SubFieldsFile string              `json:"subFieldsFile"`
+	SubFields     map[string]SubField `json:"subFields"`
 }
 
 type SubField struct {
-	Type           string            `json:"type"`
-	Length         int               `json:"length"`
-	Pattern        string            `json:"pattern"`
-	Name           string            `json:"name"`
-	Encoding       encoding.Encoding `json:"encoding"`
-	Prefix         string            `json:"prefix"`
-	PrefixEncoding string            `json:"prefixEncoding"`
-	Padding        *padding.Padding  `json:"padding"`
+	Name     string            `json:"name"`
+	Type     string            `json:"type"`
+	Length   int               `json:"length"`
+	Pattern  string            `json:"pattern"`
+	Encoding encoding.Encoding `json:"encoding"`
+	Prefix   prefix.Prefix     `json:"prefix"`
+	Padding  padding.Padding   `json:"padding"`
 }
 
 type Header struct {
@@ -57,7 +55,7 @@ type HeaderFields struct {
 	InvertPrevious bool   `json:"invertPrevious"`
 }
 
-func LoadPackager(path, file string) (pkg Packager, err error) {
+func LoadFromJson(path, file string) (pkg Packager, err error) {
 	absPath, err := filepath.Abs(path + "/" + file)
 	if err != nil {
 		return pkg, err
@@ -80,15 +78,15 @@ func LoadPackager(path, file string) (pkg Packager, err error) {
 	defer jsonFile.Close()
 
 	if pkg.HeaderFile != "" {
-		pkg.Header, err = LoadHeader(path, pkg.HeaderFile)
+		pkg.Header, err = loadHeader(path, pkg.HeaderFile)
 		if err != nil {
 			return pkg, err
 		}
 	}
 
 	for i, v := range pkg.Fields {
-		if v.SubFieldsFile != "" && v.SubFieldsFormat != "" {
-			subFields, err := LoadSubfields(path, v.SubFieldsFile)
+		if v.SubFieldsFile != "" {
+			subFields, err := loadSubfields(path, v.SubFieldsFile)
 			if err != nil {
 				return pkg, err
 			}
@@ -102,7 +100,7 @@ func LoadPackager(path, file string) (pkg Packager, err error) {
 	return pkg, nil
 }
 
-func LoadHeader(path, file string) (header Header, err error) {
+func loadHeader(path, file string) (header Header, err error) {
 	absPath, err := filepath.Abs(path + "/" + file)
 	if err != nil {
 		return header, err
@@ -128,7 +126,7 @@ func LoadHeader(path, file string) (header Header, err error) {
 	return header, nil
 }
 
-func LoadSubfields(path, file string) (subFields map[string]SubField, err error) {
+func loadSubfields(path, file string) (subFields map[string]SubField, err error) {
 	absPath, err := filepath.Abs(path + "/" + file)
 	if err != nil {
 		return subFields, err

@@ -1,7 +1,8 @@
-package message
+package bitmap
 
 import (
 	"github.com/tomasdemarco/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/field"
 	"github.com/tomasdemarco/iso8583/packager"
 	"testing"
 )
@@ -12,18 +13,11 @@ func TestUnpackBitmap(t *testing.T) {
 
 	// Encoding BCD
 	data := "d0000000000000008000000000000004"
-	message := Message{}
+
 	fieldsPackager := packager.Field{}
 	fieldsPackager.Encoding = encoding.Bcd
 
-	fields := make(map[string]packager.Field)
-	fields["001"] = fieldsPackager
-
-	pkg := packager.Packager{}
-	pkg.Fields = fields
-	message.Packager = &pkg
-
-	_, result, err := message.UnpackBitmap(0, data)
+	_, result, err := Unpack(fieldsPackager, 0, data)
 	if err != nil {
 		t.Fatalf(`UnpackBitmap(%s) - Error %s`, data, err.Error())
 	}
@@ -44,9 +38,7 @@ func TestUnpackBitmap(t *testing.T) {
 	fieldsPackager = packager.Field{}
 	fieldsPackager.Encoding = encoding.Ascii
 
-	message.Packager.Fields["001"] = fieldsPackager
-
-	_, result, err = message.UnpackBitmap(0, data)
+	_, result, err = Unpack(fieldsPackager, 0, data)
 	if err != nil {
 		t.Fatalf(`UnpackBitmap(%s) - Error %s`, data, err.Error())
 	}
@@ -67,9 +59,7 @@ func TestUnpackBitmap(t *testing.T) {
 	fieldsPackager = packager.Field{}
 	fieldsPackager.Encoding = encoding.Ebcdic
 
-	message.Packager.Fields["001"] = fieldsPackager
-
-	_, result, err = message.UnpackBitmap(0, data)
+	_, result, err = Unpack(fieldsPackager, 0, data)
 	if err != nil {
 		t.Fatalf(`UnpackBitmap(%s) - Error %s`, data, err.Error())
 	}
@@ -81,26 +71,43 @@ func TestUnpackBitmap(t *testing.T) {
 	for i, v := range result {
 		if v != expectedResult[i] {
 			t.Fatalf(`UnpackBitmap(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
-
 		}
 	}
 }
 
 // TestPackBitmap calls message.PackBitmap
 func TestPackBitmap(t *testing.T) {
-	data := []string{"004", "011"}
+	expectedResultArr := []string{"004", "011"}
 	expectedResult := "1020000000000000"
 
-	message := Message{}
-	message.SetField("004", "000001000000")
-	message.SetField("011", "000001")
+	fields := make(map[string]field.Field)
 
-	result, err := message.PackBitmap()
+	fieldAux := field.Field{Value: "000001000000"}
+	fields["004"] = fieldAux
+
+	fieldAux = field.Field{Value: "000001"}
+	fields["011"] = fieldAux
+
+	resultArr, resultStr, err := Pack(fields)
 	if err != nil {
-		t.Fatalf(`PackBitmap(%s) - Error %s`, data, err.Error())
+		t.Fatalf(`PackBitmap(%s) - Error %s`, expectedResultArr, err.Error())
 	}
 
-	if result != expectedResult {
-		t.Fatalf(`PackBitmap(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
+	if *resultStr != expectedResult {
+		t.Fatalf(`PackBitmap(%s) - Result "%s" does not match "%s"`, expectedResultArr, *resultStr, expectedResult)
+	}
+
+	t.Logf(`PackBitmap(%s) - Result "%s" match "%s"`, expectedResultArr, *resultStr, expectedResult)
+
+	if len(resultArr) != len(expectedResultArr) {
+		t.Fatalf(`UnpackBitmap(%s) - Length is different - Result "%s" / Expected "%s"`, expectedResultArr, resultArr, expectedResultArr)
+	}
+
+	t.Logf(`PackBitmap(%s) - Result "%s" match "%s"`, expectedResultArr, resultArr, expectedResultArr)
+
+	for i, v := range resultArr {
+		if v != expectedResultArr[i] {
+			t.Fatalf(`UnpackBitmap(%s) - Result "%s" does not match "%s"`, expectedResultArr, resultArr, expectedResultArr)
+		}
 	}
 }

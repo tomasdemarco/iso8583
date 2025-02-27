@@ -1,19 +1,21 @@
-package message
+package bitmap
 
 import (
 	"errors"
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/field"
+	"github.com/tomasdemarco/iso8583/packager"
 	"sort"
 	"strconv"
 )
 
-func (m *Message) UnpackBitmap(position int, messageRaw string) (int, []string, error) {
+func Unpack(field1 packager.Field, position int, messageRaw string) (int, []string, error) {
 	numberBitmaps := 1
 	var lengthBitmap int
 
 	var bitmapRaw string
-	if m.Packager.Fields["001"].Encoding == encoding.Ascii {
+	if field1.Encoding == encoding.Ascii {
 		bitmapFirstChar, err := encoding.AsciiDecode(messageRaw[position : position+2])
 		if err != nil {
 			return 0, nil, err
@@ -38,7 +40,7 @@ func (m *Message) UnpackBitmap(position int, messageRaw string) (int, []string, 
 		if err != nil {
 			return 0, nil, err
 		}
-	} else if m.Packager.Fields["001"].Encoding == encoding.Ebcdic {
+	} else if field1.Encoding == encoding.Ebcdic {
 		bitmapFirstChar, err := encoding.EbcdicDecode(messageRaw[position : position+2])
 		if err != nil {
 			return 0, nil, err
@@ -90,22 +92,20 @@ func (m *Message) UnpackBitmap(position int, messageRaw string) (int, []string, 
 	return lengthBitmap, sliceBitmap, nil
 }
 
-func (m *Message) PackBitmap() (string, error) {
+func Pack(fields map[string]field.Field) ([]string, *string, error) {
 	sliceBitmap := make([]string, 0)
 
-	for k := range m.Fields {
+	for k := range fields {
 		str := fmt.Sprintf("%03s", k)
 		sliceBitmap = append(sliceBitmap, str)
 	}
 
 	sort.Strings(sliceBitmap)
 
-	m.Bitmap = sliceBitmap
-
-	bitmap, err := encoding.BitmapEncode(m.Bitmap)
+	bitmap, err := encoding.BitmapEncode(sliceBitmap)
 	if err != nil {
-		return bitmap, err
+		return nil, nil, err
 	}
 
-	return bitmap, nil
+	return sliceBitmap, &bitmap, nil
 }

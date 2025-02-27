@@ -1,142 +1,128 @@
 {
     "00": {
+        "name": "Bitmap",
         "type": "STRING",
         "length": 16,
         "pattern": "^{16}$",
-        "name": "Bitmap",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "05": {
+        "name": "Visa Merchant Identifier",
         "type": "NUMBER",
         "length": 16,
         "pattern": "^{16}$",
-        "name": "Visa Merchant Identifier",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "06": {
+        "name": "Cardholder Certificate Serial Number",
         "type": "STRING",
         "length": 34,
         "pattern": "^{34}$",
-        "name": "Cardholder Certificate Serial Number",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "07": {
+        "name": "Merchant Certificate Serial Number",
         "type": "STRING",
         "length": 34,
         "pattern": "^{34}$",
-        "name": "Merchant Certificate Serial Number",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "08": {
+        "name": "Transaction ID (XID)",
         "type": "STRING",
         "length": 40,
         "pattern": "^{40}$",
-        "name": "Transaction ID (XID)",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "09": {
+        "name": "CAVV Data",
         "type": "STRING",
         "length": 40,
         "pattern": "^{40}$",
-        "name": "CAVV Data",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "10": {
+        "name": "CVV2 Authorization Request Data and American Express CID Data",
         "type": "STRING",
         "length": 12,
         "pattern": "^{12}$",
-        "name": "CVV2 Authorization Request Data and American Express CID Data",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "12": {
+        "name": "Service Indicators",
         "type": "STRING",
         "length": 6,
         "pattern": "^{6}$",
-        "name": "Service Indicators",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "13": {
+        "name": "POS Environment",
         "type": "NUMBER",
         "length": 2,
         "pattern": "^{2}$",
-        "name": "POS Environment",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "15": {
+        "name": "Mastercard UCAF Collection Indicator",
         "type": "STRING",
         "length": 2,
         "pattern": "^{2}$",
-        "name": "Mastercard UCAF Collection Indicator",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "16": {
+        "name": " Mastercard UCAF Field",
         "type": "STRING",
         "length": 66,
         "pattern": "^{66}$",
-        "name": " Mastercard UCAF Field",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "18": {
+        "name": " Agent Unique Account Result",
         "type": "STRING",
         "length": 24,
         "pattern": "^{24}$",
-        "name": " Agent Unique Account Result",
         "encoding": "BCD",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "19": {
+        "name": "Dynamic Currency Conversion Indicator",
         "type": "STRING",
         "length": 2,
         "pattern": "^{2}$",
-        "name": "Dynamic Currency Conversion Indicator",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     },
     "20": {
+        "name": "3-D Secure Indicator",
         "type": "NUMBER",
         "length": 2,
         "pattern": "^{2}$",
-        "name": "3-D Secure Indicator",
         "encoding": "EBCDIC",
         "prefix": null,
-        "prefixEncoding": null,
         "padding": null
     }
 }

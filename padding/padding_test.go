@@ -1,6 +1,7 @@
 package padding
 
 import (
+	"github.com/tomasdemarco/iso8583/utils"
 	"testing"
 )
 
@@ -24,9 +25,9 @@ func TestUnpackPadding(t *testing.T) {
 			padding := Padding{}
 			padding.Type = paddingType
 			padding.Position = paddingPosition
-			padding.Char = byte('0')
+			padding.Char = utils.ByteFromString('0')
 
-			resultR, resultL := Unpack(padding)
+			resultR, resultL := Unpack(padding, len(data))
 
 			if resultR != expectedResultR {
 				t.Fatalf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingPad=%s - ResultR "%d" does not match "%d"`, data, paddingType.String(), paddingPosition.String(), "0", resultR, expectedResultR)
@@ -52,7 +53,7 @@ func TestPackPadding(t *testing.T) {
 			padding := Padding{}
 			padding.Type = paddingType
 			padding.Position = paddingPosition
-			padding.Char = byte('0')
+			padding.Char = utils.ByteFromString('0')
 
 			resultR, resultL := Pack(padding, 6, len(data))
 

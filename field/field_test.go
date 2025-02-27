@@ -26,8 +26,10 @@ func TestUnpackField(t *testing.T) {
 				fieldsPackager := packager.Field{}
 				fieldsPackager.Length = 6
 				fieldsPackager.Encoding = fieldEncoding
-				fieldsPackager.Prefix.Type = fieldPrefix
-				fieldsPackager.Prefix.Encoding = prefixEncoding
+				if fieldPrefix != prefix.Fixed {
+					fieldsPackager.Prefix.Type = fieldPrefix
+					fieldsPackager.Prefix.Encoding = prefixEncoding
+				}
 
 				fields := make(map[string]packager.Field)
 				fields["011"] = fieldsPackager
@@ -60,8 +62,10 @@ func TestPackField(t *testing.T) {
 				fieldsPackager := packager.Field{}
 				fieldsPackager.Length = 6
 				fieldsPackager.Encoding = fieldEncoding
-				fieldsPackager.Prefix.Type = fieldPrefix
-				fieldsPackager.Prefix.Encoding = prefixEncoding
+				if fieldPrefix != prefix.Fixed {
+					fieldsPackager.Prefix.Type = fieldPrefix
+					fieldsPackager.Prefix.Encoding = prefixEncoding
+				}
 
 				fields := make(map[string]packager.Field)
 				fields["011"] = fieldsPackager
@@ -69,7 +73,10 @@ func TestPackField(t *testing.T) {
 				pkg := packager.Packager{}
 				pkg.Fields = fields
 
-				result := Pack(fieldsPackager, data)
+				result, err := Pack(fieldsPackager, data)
+				if err != nil {
+					t.Fatalf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), err.Error())
+				}
 
 				if result != expectedResult {
 					t.Fatalf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), result, expectedResult)

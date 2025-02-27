@@ -8,11 +8,13 @@ import (
 type Type int
 
 const (
-	Fill Type = iota
+	None Type = iota
+	Fill
 	Parity
 )
 
 var paddingStrings = [...]string{
+	None:   "NONE",
 	Fill:   "FILL",
 	Parity: "PARITY",
 }
