@@ -1,6 +1,7 @@
 package prefix
 
 import (
+	"errors"
 	"fmt"
 	enc "github.com/tomasdemarco/iso8583/encoding"
 	"strconv"
@@ -17,6 +18,10 @@ func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
 	}
 
 	prefixLength := GetPrefixLen(prefix.Type, prefix.Encoding)
+
+	if len(messageRaw) < prefixLength {
+		return 0, 0, errors.New("index out of range while trying to unpack prefix")
+	}
 
 	switch prefix.Encoding {
 	case enc.Ascii:
@@ -73,15 +78,15 @@ func Pack(prefix Prefix, value int) (string, error) {
 			return enc.AsciiEncode(fmt.Sprintf("%02d", value)), nil
 		}
 	case enc.Hex:
-		if prefix.Type == LLL {
-			valueEnc, err := enc.HexEncode(fmt.Sprintf("%d", value))
+		if prefix.Type == LLL || prefix.Type == LLLL {
+			valueEnc, err := enc.HexEncode(fmt.Sprintf("%04d", value))
 			if err != nil {
 				return "", err
 			}
 
 			return fmt.Sprintf("%04s", valueEnc), nil
 		} else {
-			valueEnc, err := enc.HexEncode(fmt.Sprintf("%d", value))
+			valueEnc, err := enc.HexEncode(fmt.Sprintf("%02d", value))
 			if err != nil {
 				return "", err
 			}
@@ -133,8 +138,8 @@ func GetPrefixLen(prefixType Type, prefixEncoding enc.Encoding) int {
 		length = 2
 	}
 
-	if prefixEncoding == enc.Ascii ||
-		prefixEncoding == enc.Ebcdic {
+	if prefixEncoding != enc.Bcd &&
+		prefixEncoding != enc.Hex {
 		if prefixType == LLL {
 			length--
 		}

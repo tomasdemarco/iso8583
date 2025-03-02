@@ -15,7 +15,7 @@ func TestUnpackEncoding(t *testing.T) {
 		expectedResult := "000001"
 		data := ValuesEncoding[e]
 
-		result, _, err := Unpack(enc, data, "011", 0, 6)
+		result, err := Unpack(enc, data)
 		if err != nil {
 			t.Fatalf(`UnpackEncoding(%s) Encoding=%s - Error %s`, data, enc.String(), err.Error())
 		}

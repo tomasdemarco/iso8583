@@ -3,8 +3,8 @@ package message
 import (
 	"errors"
 	"fmt"
-	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager"
+	"github.com/tomasdemarco/iso8583/prefix"
 	"io"
 	"sort"
 	"strconv"
@@ -12,7 +12,10 @@ import (
 
 func UnpackHeader(messageRaw string, packager *packager.Packager) (header map[string]string, err error) {
 	header = make(map[string]string)
-	position := packager.PrefixLength
+
+	prefixLength := prefix.GetPrefixLen(packager.Prefix.Type, packager.Prefix.Encoding)
+
+	position := prefixLength
 
 	for i, v := range packager.Header.HeaderFields {
 		if len(messageRaw) > position+v.Length {
@@ -68,19 +71,28 @@ func UnpackLength(messageRaw []byte) (length int, err error) {
 	return length, err
 }
 
-func PackLength(messageRaw string, headerLength int) (lengthHex string) {
-	lengthHex, _ = encoding.HexEncode(fmt.Sprintf("%d", (len(messageRaw)+headerLength)/2))
-	return fmt.Sprintf("%04s", lengthHex)
+func PackLength(prefixValue prefix.Prefix, lenMessage int) (string, error) {
+	return prefix.Pack(prefixValue, lenMessage)
 }
 
-func GetLength(r io.Reader) (int, error) {
-	buf := make([]byte, 2)
+func GetLength(r io.Reader, prefixValue prefix.Prefix) (int, int, error) {
+
+	prefixLength := prefix.GetPrefixLen(prefixValue.Type, prefixValue.Encoding)
+
+	buf := make([]byte, prefixLength/2)
 	_, err := io.ReadFull(r, buf)
 	if err != nil {
-		return 0, fmt.Errorf("reading header: %w", err)
+		if err != io.EOF {
+			err = fmt.Errorf("reading length: %w", err)
+		}
+
+		return 0, 0, err
 	}
 
-	value, err := strconv.ParseInt(fmt.Sprintf("%x", buf), 16, 64)
+	result, _, err := prefix.Unpack(prefixValue, fmt.Sprintf("%x", buf))
+	if err != nil {
+		return 0, 0, err
+	}
 
-	return int(value), nil
+	return result, prefixLength, err
 }

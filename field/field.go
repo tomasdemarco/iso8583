@@ -19,11 +19,6 @@ type Field struct {
 
 func Unpack(fieldPackager packager.Field, messageRaw string, position int, field string) (*string, *int, error) {
 
-	if len(messageRaw) < position+(fieldPackager.Prefix.Type.EnumIndex()*1) {
-		err := errors.New("index out of range while trying to unpack prefix field " + field)
-		return nil, nil, err
-	}
-
 	length, lengthPrefix, err := prefix.Unpack(fieldPackager.Prefix, messageRaw[position:])
 	if err != nil {
 		return nil, nil, err
@@ -33,14 +28,18 @@ func Unpack(fieldPackager packager.Field, messageRaw string, position int, field
 		length = fieldPackager.Length
 	}
 
-	if len(messageRaw) < position+length+lengthPrefix {
-		err = errors.New("index out of range while trying to unpack field " + field)
-		return nil, nil, err
+	if fieldPackager.Encoding != encoding.Bcd &&
+		fieldPackager.Encoding != encoding.Hex {
+		length = length * 2 //TODO si lo manejara en bytes, BCD es la mitad ya que es comprimido
 	}
 
 	paddingRight, paddingLeft := padding.Unpack(fieldPackager.Padding, length)
-	fmt.Println(paddingRight, paddingLeft)
-	value, doubleLength, err := encoding.Unpack(fieldPackager.Encoding, messageRaw, field, position+lengthPrefix+paddingLeft, length)
+
+	if len(messageRaw) < position+length+lengthPrefix+paddingLeft {
+		return nil, nil, errors.New("index out of range while trying to unpack field " + field)
+	}
+
+	value, err := encoding.Unpack(fieldPackager.Encoding, messageRaw[position+lengthPrefix+paddingLeft:position+lengthPrefix+paddingLeft+length])
 	if err != nil {
 		return nil, nil, err
 	}
@@ -55,7 +54,7 @@ func Unpack(fieldPackager packager.Field, messageRaw string, position int, field
 	//	m.UnpackSubfields(field, value)
 	//}
 
-	length = length*doubleLength + lengthPrefix + paddingRight + paddingLeft
+	length = length + lengthPrefix + paddingRight + paddingLeft
 
 	return &value, &length, nil
 }

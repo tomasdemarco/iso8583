@@ -11,25 +11,25 @@ import (
 )
 
 type Packager struct {
-	Name           string            `json:"name"`
-	PrefixLength   int               `json:"prefixLength"`
-	PrefixEncoding encoding.Encoding `json:"prefixEncoding"`
-	HeaderLength   int               `json:"headerLength"`
-	Header         Header            `json:"header"`
-	HeaderFile     string            `json:"headerFile"`
-	Fields         map[string]Field  `json:"fields"`
+	Name         string           `json:"name"`
+	Prefix       prefix.Prefix    `json:"prefix"`
+	HeaderLength int              `json:"headerLength"`
+	Header       Header           `json:"header"`
+	HeaderFile   string           `json:"headerFile"`
+	Fields       map[string]Field `json:"fields"`
 }
 
 type Field struct {
-	Name          string              `json:"name"`
-	Type          string              `json:"type"`
-	Length        int                 `json:"length"`
-	Pattern       string              `json:"pattern"`
-	Encoding      encoding.Encoding   `json:"encoding"`
-	Prefix        prefix.Prefix       `json:"prefix"`
-	Padding       padding.Padding     `json:"padding"`
-	SubFieldsFile string              `json:"subFieldsFile"`
-	SubFields     map[string]SubField `json:"subFields"`
+	Name            string              `json:"name"`
+	Type            string              `json:"type"`
+	Length          int                 `json:"length"`
+	Pattern         string              `json:"pattern"`
+	Encoding        encoding.Encoding   `json:"encoding"`
+	Prefix          prefix.Prefix       `json:"prefix"`
+	Padding         padding.Padding     `json:"padding"`
+	SubFieldsFile   string              `json:"subFieldsFile"`
+	SubFieldsFormat string              `json:"subFieldsFormat"`
+	SubFields       map[string]SubField `json:"subFields"`
 }
 
 type SubField struct {
