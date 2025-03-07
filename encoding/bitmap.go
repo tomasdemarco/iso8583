@@ -2,20 +2,21 @@ package encoding
 
 import (
 	"fmt"
+	"github.com/tomasdemarco/iso8583/utils"
 	"strconv"
 )
 
-func BitmapDecode(value string) ([]string, error) {
+func BitmapDecode(value []byte) ([]string, error) {
 
-	primaryBitmap, err := strconv.ParseUint(value[:16], 16, 64)
+	primaryBitmap, err := strconv.ParseUint(fmt.Sprintf("%x", value[:8]), 16, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	bitmapBinary := fmt.Sprintf("%064b", primaryBitmap)
 
-	if len(value) == 32 {
-		secondaryBitmap, err := strconv.ParseUint(value[16:], 16, 64)
+	if len(value) == 16 {
+		secondaryBitmap, err := strconv.ParseUint(fmt.Sprintf("%x", value[8:]), 16, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +36,7 @@ func BitmapDecode(value string) ([]string, error) {
 	return sliceBitmap, nil
 }
 
-func BitmapEncode(value []string) (string, error) {
+func BitmapEncode(value []string) ([]byte, error) {
 	var bitmap string
 	bitmapArray := make(map[int]string)
 
@@ -44,7 +45,7 @@ func BitmapEncode(value []string) (string, error) {
 	for _, i := range value {
 		val, err := strconv.Atoi(i)
 		if err != nil {
-			return bitmap, err
+			return nil, err
 		}
 
 		bitmapArray[val] = "1"
@@ -65,17 +66,17 @@ func BitmapEncode(value []string) (string, error) {
 
 	primaryBitmap, err := strconv.ParseUint(bitmap[:64], 2, 64)
 	if err != nil {
-		return bitmap, err
+		return nil, err
 	}
 	result := fmt.Sprintf("%016x", primaryBitmap)
 
 	if len(bitmap) > 64 {
 		secondary, err := strconv.ParseUint(bitmap[64:], 2, 64)
 		if err != nil {
-			return bitmap, err
+			return nil, err
 		}
 		result += fmt.Sprintf("%016x", secondary)
 	}
 
-	return result, nil
+	return utils.Hex2Byte(result), nil
 }

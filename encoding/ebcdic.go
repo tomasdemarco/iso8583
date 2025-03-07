@@ -1,10 +1,5 @@
 package encoding
 
-import (
-	"fmt"
-	"github.com/tomasdemarco/iso8583/utils"
-)
-
 var (
 	asciiToEbcdic = []byte{
 		'\x00', '\x01', '\x02', '\x03', '\x37', '\x2D', '\x2E', '\x2F',
@@ -75,20 +70,19 @@ var (
 		'\x38', '\x39', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'}
 )
 
-func EbcdicEncode(srcString string) (string, error) {
-	src := []byte(srcString)
+func EbcdicEncode(src string) []byte {
 	var dst []byte
-	for _, v := range src {
+	for _, v := range []byte(src) {
 		dst = append(dst, asciiToEbcdic[v])
 	}
-	return fmt.Sprintf("%x", dst), nil
+	return dst
 }
 
-func EbcdicDecode(srcString string) (string, error) {
-	src := utils.Hex2Byte(srcString)
+func EbcdicDecode(src []byte) string {
 	var dst []byte
 	for _, v := range src {
 		dst = append(dst, ebcdicToAscii[v])
 	}
-	return AsciiDecode(fmt.Sprintf("%x", dst))
+
+	return string(dst)
 }

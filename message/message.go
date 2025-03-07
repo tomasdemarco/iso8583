@@ -1,6 +1,7 @@
 package message
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/tomasdemarco/iso8583/bitmap"
@@ -25,7 +26,7 @@ func NewMessage(packager *packager.Packager) *Message {
 	}
 }
 
-func (m *Message) Unpack(messageRaw string) (err error) {
+func (m *Message) Unpack(messageRaw []byte) (err error) {
 	if _, ok := m.Packager.Fields["000"]; !ok {
 		err = errors.New("packager does not contain field 000")
 		return err
@@ -63,7 +64,7 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 
 	m.Bitmap = sliceBitmap
 
-	m.SetField("001", messageRaw[position:position+lengthBitmap])
+	m.SetField("001", fmt.Sprintf("%x", messageRaw[position:position+lengthBitmap]))
 
 	position += lengthBitmap
 
@@ -88,16 +89,16 @@ func (m *Message) Unpack(messageRaw string) (err error) {
 	return nil
 }
 
-func (m *Message) Pack() (message string, err error) {
+func (m *Message) Pack() ([]byte, error) {
 
 	bitmapSlice, bitmapString, err := bitmap.Pack(m.Fields)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	m.Bitmap = bitmapSlice
 
-	m.SetField("001", *bitmapString)
+	m.SetField("001", fmt.Sprintf("%x", bitmapString))
 
 	keys := make([]string, 0, len(m.Fields))
 	for k := range m.Fields {
@@ -113,22 +114,24 @@ func (m *Message) Pack() (message string, err error) {
 
 		if fieldsAux[k].SubFields != nil {
 			fieldAux := fieldsAux[k]
-			value = fieldAux.PackSubfields(m.Packager.Fields[k].SubFields)
+			value = fmt.Sprintf("%x", fieldAux.PackSubfields(m.Packager.Fields[k].SubFields))
 		}
 
 		m.SetField(k, value)
 	}
 
+	msgPacked := new(bytes.Buffer)
+
 	for _, k := range keys {
 		fieldEncode, errPack := field.Pack(m.Packager.Fields[k], m.Fields[k].Value)
 		if errPack != nil {
-			return "", errPack
+			return nil, errPack
 		}
 		//m.SetField(k, fieldEncode) //TODO creo que no hace falta
-		message += fieldEncode
+		msgPacked.Write(fieldEncode)
 	}
 
-	return message, err
+	return msgPacked.Bytes(), err
 }
 
 func (m *Message) SetField(fieldId string, value string) {

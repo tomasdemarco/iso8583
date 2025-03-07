@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	enc "github.com/tomasdemarco/iso8583/encoding"
+	"github.com/tomasdemarco/iso8583/utils"
 	"strconv"
 )
 
@@ -12,7 +13,7 @@ type Prefix struct {
 	Encoding enc.Encoding `json:"encoding"`
 }
 
-func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
+func Unpack(prefix Prefix, messageRaw []byte) (int, int, error) {
 	if prefix.Type == Fixed {
 		return 0, 0, nil
 	}
@@ -41,10 +42,7 @@ func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
 
 		return length, prefixLength, nil
 	case enc.Ebcdic:
-		lengthString, err := enc.EbcdicDecode(messageRaw[:prefixLength])
-		if err != nil {
-			return 0, 0, err
-		}
+		lengthString := enc.EbcdicDecode(messageRaw[:prefixLength])
 
 		length, err := strconv.Atoi(lengthString)
 		if err != nil {
@@ -53,7 +51,7 @@ func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
 
 		return length, prefixLength, nil
 	default:
-		length, err := strconv.Atoi(messageRaw[:prefixLength])
+		length, err := strconv.Atoi(fmt.Sprintf("%x", messageRaw[:prefixLength]))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -62,9 +60,9 @@ func Unpack(prefix Prefix, messageRaw string) (int, int, error) {
 	}
 }
 
-func Pack(prefix Prefix, value int) (string, error) {
+func Pack(prefix Prefix, value int) ([]byte, error) {
 	if prefix.Type == Fixed {
-		return "", nil
+		return nil, nil
 	}
 
 	switch prefix.Encoding {
@@ -78,49 +76,34 @@ func Pack(prefix Prefix, value int) (string, error) {
 			return enc.AsciiEncode(fmt.Sprintf("%02d", value)), nil
 		}
 	case enc.Hex:
+		valueEnc, err := enc.HexEncode(fmt.Sprintf("%d", value))
+		if err != nil {
+			return nil, err
+		}
 		if prefix.Type == LLL || prefix.Type == LLLL {
-			valueEnc, err := enc.HexEncode(fmt.Sprintf("%04d", value))
-			if err != nil {
-				return "", err
-			}
-
-			return fmt.Sprintf("%04s", valueEnc), nil
+			return utils.Hex2Byte(fmt.Sprintf("%04s", valueEnc)), nil
 		} else {
-			valueEnc, err := enc.HexEncode(fmt.Sprintf("%02d", value))
-			if err != nil {
-				return "", err
-			}
-
-			return fmt.Sprintf("%02s", valueEnc), nil
+			return utils.Hex2Byte(fmt.Sprintf("%02s", valueEnc)), nil
 		}
 	case enc.Ebcdic:
 		if prefix.Type == LLLL {
-			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%04d", value))
-			if err != nil {
-				return "", err
-			}
+			valueEnc := enc.EbcdicEncode(fmt.Sprintf("%04d", value))
 
 			return valueEnc, nil
 		} else if prefix.Type == LLL {
-			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%03d", value))
-			if err != nil {
-				return "", err
-			}
+			valueEnc := enc.EbcdicEncode(fmt.Sprintf("%03d", value))
 
 			return valueEnc, nil
 		} else {
-			valueEnc, err := enc.EbcdicEncode(fmt.Sprintf("%02d", value))
-			if err != nil {
-				return "", err
-			}
+			valueEnc := enc.EbcdicEncode(fmt.Sprintf("%02d", value))
 
 			return valueEnc, nil
 		}
 	default:
 		if prefix.Type == LLL || prefix.Type == LLLL {
-			return fmt.Sprintf("%04d", value), nil
+			return utils.Hex2Byte(fmt.Sprintf("%04d", value)), nil
 		} else {
-			return fmt.Sprintf("%02d", value), nil
+			return utils.Hex2Byte(fmt.Sprintf("%02d", value)), nil
 		}
 	}
 }
@@ -129,22 +112,25 @@ func GetPrefixLen(prefixType Type, prefixEncoding enc.Encoding) int {
 	var length int
 	switch prefixType {
 	case LL:
-		length = 2
-	case LLL:
-		length = 4
-	case LLLL:
-		length = 4
-	default:
-		length = 2
-	}
-
-	if prefixEncoding != enc.Bcd &&
-		prefixEncoding != enc.Hex {
-		if prefixType == LLL {
-			length--
+		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+			length = 2
+		} else {
+			length = 1
 		}
-
-		length = length * 2
+	case LLL:
+		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+			length = 3
+		} else {
+			length = 2
+		}
+	case LLLL:
+		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+			length = 4
+		} else {
+			length = 2
+		}
+	default:
+		length = 1
 	}
 
 	return length

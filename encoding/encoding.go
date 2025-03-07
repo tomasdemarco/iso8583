@@ -1,40 +1,43 @@
 package encoding
 
-func Unpack(encoding Encoding, value string) (string, error) {
+import (
+	"fmt"
+	"github.com/tomasdemarco/iso8583/utils"
+)
+
+func Unpack(encoding Encoding, value []byte) (string, error) {
 	switch encoding {
 	case Ascii:
 		result, err := AsciiDecode(value)
 		return result, err
 	case Ebcdic:
-		result, err := EbcdicDecode(value)
-		return result, err
+		result := EbcdicDecode(value)
+		return result, nil
 	default:
-		return value, nil
+		return fmt.Sprintf("%x", value), nil
 	}
 }
 
-func Pack(encoding Encoding, value string) string {
+func Pack(encoding Encoding, value string) []byte {
 	switch encoding {
 	case Ascii:
 		result := AsciiEncode(value)
 		return result
 	case Ebcdic:
-		result, _ := EbcdicEncode(value)
-		return result
+		return EbcdicEncode(value)
 	default:
-		return value
+		return utils.Hex2Byte(value)
 	}
 }
 
-func PackSubField(encoding Encoding, value string) string {
+func PackSubField(encoding Encoding, value string) []byte {
 	switch encoding {
 	case Ascii:
 		result := AsciiEncode(value)
 		return result
 	case Ebcdic:
-		result, _ := EbcdicEncode(value)
-		return result
+		return EbcdicEncode(value)
 	default:
-		return value
+		return []byte(value)
 	}
 }

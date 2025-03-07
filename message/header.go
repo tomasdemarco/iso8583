@@ -71,7 +71,7 @@ func UnpackLength(messageRaw []byte) (length int, err error) {
 	return length, err
 }
 
-func PackLength(prefixValue prefix.Prefix, lenMessage int) (string, error) {
+func PackLength(prefixValue prefix.Prefix, lenMessage int) ([]byte, error) {
 	return prefix.Pack(prefixValue, lenMessage)
 }
 
@@ -79,7 +79,7 @@ func GetLength(r io.Reader, prefixValue prefix.Prefix) (int, int, error) {
 
 	prefixLength := prefix.GetPrefixLen(prefixValue.Type, prefixValue.Encoding)
 
-	buf := make([]byte, prefixLength/2)
+	buf := make([]byte, prefixLength)
 	_, err := io.ReadFull(r, buf)
 	if err != nil {
 		if err != io.EOF {
@@ -89,7 +89,7 @@ func GetLength(r io.Reader, prefixValue prefix.Prefix) (int, int, error) {
 		return 0, 0, err
 	}
 
-	result, _, err := prefix.Unpack(prefixValue, fmt.Sprintf("%x", buf))
+	result, _, err := prefix.Unpack(prefixValue, buf)
 	if err != nil {
 		return 0, 0, err
 	}

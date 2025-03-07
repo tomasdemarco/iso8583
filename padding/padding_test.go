@@ -27,17 +27,17 @@ func TestUnpackPadding(t *testing.T) {
 			padding.Position = paddingPosition
 			padding.Char = utils.ByteFromString('0')
 
-			resultR, resultL := Unpack(padding, len(data))
-
-			if resultR != expectedResultR {
-				t.Fatalf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingPad=%s - ResultR "%d" does not match "%d"`, data, paddingType.String(), paddingPosition.String(), "0", resultR, expectedResultR)
-			}
-			t.Logf(`UnpackPadding=%s PaddingType=%-6s - PaddingPosition=%s - PaddingPad=%s - ResultR "%d" match "%d"`, data, paddingType.String(), paddingPosition.String(), "0", resultR, expectedResultR)
+			resultL, resultR := Unpack(padding, len(data))
 
 			if resultL != expectedResultL {
-				t.Fatalf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingPad=%s - ResultL "%d" does not match "%d"`, data, paddingType.String(), paddingPosition.String(), "0", resultL, expectedResultL)
+				t.Fatalf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultL "%d" does not match "%d"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultL, expectedResultL)
 			}
-			t.Logf(`UnpackPadding=%s PaddingType=%-6s - PaddingPosition=%s - PaddingPad=%s - ResultL "%d" match "%d"`, data, paddingType.String(), paddingPosition.String(), "0", resultL, expectedResultL)
+			t.Logf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultL "%d" match "%d"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultL, expectedResultL)
+
+			if resultR != expectedResultR {
+				t.Fatalf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultR "%d" does not match "%d"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultR, expectedResultR)
+			}
+			t.Logf(`UnpackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultR "%d" match "%d"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultR, expectedResultR)
 		}
 	}
 }
@@ -55,17 +55,17 @@ func TestPackPadding(t *testing.T) {
 			padding.Position = paddingPosition
 			padding.Char = utils.ByteFromString('0')
 
-			resultR, resultL := Pack(padding, 6, len(data))
-
-			if resultR != expectedResultR {
-				t.Fatalf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingPad=%s - ResultR "%s" does not match "%s"`, data, paddingType.String(), paddingPosition.String(), "0", resultR, expectedResultR)
-			}
-			t.Logf(`PackPadding=%s PaddingType=%-6s - PaddingPosition=%s - PaddingPad=%s - ResultR "%s" match "%s"`, data, paddingType.String(), paddingPosition.String(), "0", resultR, expectedResultR)
+			resultL, resultR := Pack(padding, 6, len(data))
 
 			if resultL != expectedResultL {
-				t.Fatalf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingPad=%s - ResultL "%s" does not match "%s"`, data, paddingType.String(), paddingPosition.String(), "0", resultL, expectedResultL)
+				t.Fatalf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultL "%s" does not match "%s"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultL, expectedResultL)
 			}
-			t.Logf(`PackPadding=%s PaddingType=%-6s - PaddingPosition=%s - PaddingPad=%s - ResultL "%s" match "%s"`, data, paddingType.String(), paddingPosition.String(), "0", resultL, expectedResultL)
+			t.Logf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultL "%s" match "%s"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultL, expectedResultL)
+
+			if resultR != expectedResultR {
+				t.Fatalf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultR "%s" does not match "%s"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultR, expectedResultR)
+			}
+			t.Logf(`PackPadding(%s) PaddingType=%s - PaddingPosition=%s - PaddingChar=%x - ResultR "%s" match "%s"`, data, paddingType.String(), paddingPosition.String(), padding.Char, resultR, expectedResultR)
 		}
 	}
 }

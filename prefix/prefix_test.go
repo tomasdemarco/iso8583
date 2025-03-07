@@ -1,6 +1,8 @@
 package prefix
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"testing"
 )
@@ -8,9 +10,9 @@ import (
 var (
 	Prefixes                 = []Type{LL, LLL}
 	PrefixEncoding           = []encoding.Encoding{encoding.Bcd, encoding.Hex, encoding.Ascii, encoding.Ebcdic}
-	PrefixValues             = []string{"06", "06", "3036", "f0f6", "0006", "0006", "303036", "f0f0f6"}
+	PrefixValues             = [][]byte{{0x06}, {0x06}, {0x30, 0x36}, {0xF0, 0xF6}, {0x00, 0x06}, {0x00, 0x06}, {0x30, 0x30, 0x36}, {0xF0, 0xF0, 0xF6}}
 	ResultPrefixValues       = []int{6, 6, 6, 6, 6, 6, 6, 6}
-	ResultPrefixLengthValues = []int{2, 2, 4, 4, 4, 4, 6, 6}
+	ResultPrefixLengthValues = []int{1, 1, 2, 2, 2, 2, 3, 3}
 )
 
 // TestUnpackPrefix calls message.UnpackPrefix
@@ -23,17 +25,21 @@ func TestUnpackPrefix(t *testing.T) {
 			prefix.Type = prefixType
 			prefix.Encoding = prefixEncoding
 
-			resultPrefix, resultPrefixLength, _ := Unpack(prefix, data)
+			resultPrefix, resultPrefixLength, err := Unpack(prefix, data)
+			fmt.Println(resultPrefix, resultPrefixLength)
+			if err != nil {
+				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Error %s`, data, prefixType.String(), prefixEncoding.String(), err.Error())
+			}
 
 			if resultPrefix != ResultPrefixValues[pe+(p*4)] {
-				t.Fatalf(`UnpackPrefix(%s) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
+				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
 			}
-			t.Logf(`UnpackPrefix=%-6s - Prefix=%s - PrefixEncoding=%-6s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
+			t.Logf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
 
 			if resultPrefixLength != ResultPrefixLengthValues[pe+(p*4)] {
-				t.Fatalf(`UnpackPrefix(%s) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
+				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
 			}
-			t.Logf(`UnpackPrefix=%-6s - Prefix=%s - PrefixEncoding=%-6s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
+			t.Logf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
 		}
 	}
 }
@@ -49,12 +55,15 @@ func TestPackPrefix(t *testing.T) {
 			prefix.Type = prefixType
 			prefix.Encoding = prefixEncoding
 
-			result, _ := Pack(prefix, len(data))
-
-			if result != expectedResult {
-				t.Fatalf(`PackField(%s) - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
+			result, err := Pack(prefix, len(data))
+			if err != nil {
+				t.Fatalf(`PackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Error %s`, data, prefixType.String(), prefixEncoding.String(), err.Error())
 			}
-			t.Logf(`PackField=%-6s - Prefix=%s - PrefixEncoding=%s - Result "%s" match "%s"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
+
+			if !bytes.Equal(result, expectedResult) {
+				t.Fatalf(`Prefix(%s) - Prefix=%s - PrefixEncoding=%s - Result "%x" does not match "%x"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
+			}
+			t.Logf(`Prefix(%s) - Prefix=%s - PrefixEncoding=%s - Result "%x" match "%x"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
 		}
 	}
 }

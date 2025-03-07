@@ -5,19 +5,19 @@ import (
 	"strconv"
 )
 
-func HexDecode(value string) (string, error) {
-	stringValue, err := strconv.ParseInt(value, 16, 32)
+func HexDecode(src []byte) (string, error) {
+	dstInt64, err := strconv.ParseInt(fmt.Sprintf("%x", src), 16, 32)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%v", stringValue), nil
+	return fmt.Sprintf("%v", dstInt64), nil
 }
 
-func HexEncode(value string) (string, error) {
+func HexEncode(value string) ([]byte, error) {
 	intValue, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	stringValue := strconv.FormatInt(intValue, 16)
-	return stringValue, nil
+	return []byte(stringValue), nil
 }
