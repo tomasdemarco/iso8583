@@ -1,6 +1,7 @@
 package field
 
 import (
+	"bytes"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager"
 	"github.com/tomasdemarco/iso8583/prefix"
@@ -9,10 +10,10 @@ import (
 
 var (
 	FieldEncoding       = []encoding.Encoding{encoding.Bcd, encoding.Ascii, encoding.Ebcdic}
-	FieldValuesEncoding = []string{"000001", "303030303031", "f0f0f0f0f0f1"}
+	FieldValuesEncoding = [][]byte{{0x00, 0x00, 0x01}, {0x30, 0x30, 0x30, 0x30, 0x30, 0x31}, {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1}}
 	FieldPrefix         = []prefix.Type{prefix.Fixed, prefix.LL, prefix.LLL}
 	FieldPrefixEncoding = []encoding.Encoding{encoding.Bcd, encoding.Hex, encoding.Ascii, encoding.Ebcdic}
-	FieldPrefixValues   = []string{"", "06", "0006", "", "06", "0006", "", "3036", "303036", "", "f0f6", "f0f0f6"}
+	FieldPrefixValues   = [][]byte{{}, {0x06}, {0x00, 0x06}, {}, {0x06}, {0x00, 0x06}, {}, {0x30, 0x36}, {0x30, 0x30, 0x36}, {}, {0xF0, 0xF6}, {0xF0, 0xF0, 0xF6}}
 )
 
 // TestUnpackField calls message.UnpackField
@@ -21,7 +22,7 @@ func TestUnpackField(t *testing.T) {
 		for pe, prefixEncoding := range FieldPrefixEncoding {
 			for p, fieldPrefix := range FieldPrefix {
 				expectedResult := "000001"
-				data := FieldPrefixValues[p+(pe*3)] + FieldValuesEncoding[e]
+				data := append(FieldPrefixValues[p+(pe*3)], FieldValuesEncoding[e]...)
 
 				fieldsPackager := packager.Field{}
 				fieldsPackager.Length = 6
@@ -39,13 +40,13 @@ func TestUnpackField(t *testing.T) {
 
 				result, _, err := Unpack(fieldsPackager, data, 0, "011")
 				if err != nil {
-					t.Fatalf(`UnpackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), err.Error())
+					t.Fatalf(`UnpackField(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), err.Error())
 				}
 
 				if *result != expectedResult {
-					t.Fatalf(`UnpackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), *result, expectedResult)
+					t.Fatalf(`UnpackField(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), *result, expectedResult)
 				}
-				t.Logf(`UnpackField=%-28s Encoding=%-6s - Prefix=%-5s - PrefixEncoding=%-6s - Result "%-6s" match "%-6s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), *result, expectedResult)
+				t.Logf(`UnpackField(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" match "%s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), *result, expectedResult)
 			}
 		}
 	}
@@ -57,7 +58,7 @@ func TestPackField(t *testing.T) {
 		for pe, prefixEncoding := range FieldPrefixEncoding {
 			for p, fieldPrefix := range FieldPrefix {
 				data := "000001"
-				expectedResult := FieldPrefixValues[p+(pe*3)] + FieldValuesEncoding[e]
+				expectedResult := append(FieldPrefixValues[p+(pe*3)], FieldValuesEncoding[e]...)
 
 				fieldsPackager := packager.Field{}
 				fieldsPackager.Length = 6
@@ -78,10 +79,10 @@ func TestPackField(t *testing.T) {
 					t.Fatalf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), err.Error())
 				}
 
-				if result != expectedResult {
-					t.Fatalf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), result, expectedResult)
+				if !bytes.Equal(result, expectedResult) {
+					t.Fatalf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%x" does not match "%x"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), result, expectedResult)
 				}
-				t.Logf(`PackField=%-11s Encoding=%-6s - Prefix=%-5s - PrefixEncoding=%-6s - Result "%-28s" match "%-6s"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), result, expectedResult)
+				t.Logf(`PackField(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%x" match "%x"`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), result, expectedResult)
 			}
 		}
 	}

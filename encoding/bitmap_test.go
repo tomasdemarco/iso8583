@@ -1,10 +1,13 @@
 package encoding
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 // TestBitmapDecode calls encoding.BitmapDecode
 func TestBitmapDecode(t *testing.T) {
-	data := "0020000000000000"
+	data := []byte{0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	expectedResult := []string{"011"}
 
 	result, err := BitmapDecode(data)
@@ -27,14 +30,14 @@ func TestBitmapDecode(t *testing.T) {
 // TestBitmapEncode calls encoding.BitmapEncode
 func TestBitmapEncode(t *testing.T) {
 	data := []string{"001", "002", "004", "065", "126"}
-	expectedResult := "d0000000000000008000000000000004"
+	expectedResult := []byte{0xd0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04}
 
 	result, err := BitmapEncode(data)
 	if err != nil {
 		t.Fatalf(`BitmapEncode(%s) - Error %s`, data, err.Error())
 	}
 
-	if result != expectedResult {
+	if !bytes.Equal(result, expectedResult) {
 		t.Fatalf(`BitmapEncode(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
 	}
 }

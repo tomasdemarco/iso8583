@@ -1,6 +1,7 @@
 package field
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
@@ -17,12 +18,7 @@ type Field struct {
 	SubFields map[string]string
 }
 
-func Unpack(fieldPackager packager.Field, messageRaw string, position int, field string) (*string, *int, error) {
-
-	if len(messageRaw) < position+(fieldPackager.Prefix.Type.EnumIndex()*1) {
-		err := errors.New("index out of range while trying to unpack prefix field " + field)
-		return nil, nil, err
-	}
+func Unpack(fieldPackager packager.Field, messageRaw []byte, position int, field string) (*string, *int, error) {
 
 	length, lengthPrefix, err := prefix.Unpack(fieldPackager.Prefix, messageRaw[position:])
 	if err != nil {
@@ -33,17 +29,25 @@ func Unpack(fieldPackager packager.Field, messageRaw string, position int, field
 		length = fieldPackager.Length
 	}
 
-	if len(messageRaw) < position+length+lengthPrefix {
-		err = errors.New("index out of range while trying to unpack field " + field)
-		return nil, nil, err
+	paddingLeft, paddingRight := padding.Unpack(fieldPackager.Padding, length)
+
+	length += paddingLeft + paddingRight
+
+	if fieldPackager.Encoding == encoding.Bcd ||
+		fieldPackager.Encoding == encoding.Hex {
+		length = length / 2 //TODO si lo manejara en bytes, BCD es la mitad ya que es comprimido
 	}
 
-	paddingRight, paddingLeft := padding.Unpack(fieldPackager.Padding, length)
-	fmt.Println(paddingRight, paddingLeft)
-	value, doubleLength, err := encoding.Unpack(fieldPackager.Encoding, messageRaw, field, position+lengthPrefix+paddingLeft, length)
+	if len(messageRaw) < position+length+lengthPrefix {
+		return nil, nil, errors.New("index out of range while trying to unpack field " + field)
+	}
+
+	value, err := encoding.Unpack(fieldPackager.Encoding, messageRaw[position+lengthPrefix:position+lengthPrefix+length])
 	if err != nil {
 		return nil, nil, err
 	}
+
+	value = value[paddingLeft : len(value)-paddingRight]
 
 	match, _ := regexp.MatchString(fieldPackager.Pattern, value)
 	if !match {
@@ -55,21 +59,26 @@ func Unpack(fieldPackager packager.Field, messageRaw string, position int, field
 	//	m.UnpackSubfields(field, value)
 	//}
 
-	length = length*doubleLength + lengthPrefix + paddingRight + paddingLeft
+	length = length + lengthPrefix
 
 	return &value, &length, nil
 }
 
-func Pack(fieldPackager packager.Field, value string) (string, error) {
-	fieldPrefix, err := prefix.Pack(fieldPackager.Prefix, len(value))
-	if err != nil {
-		return "", err
+func Pack(fieldPackager packager.Field, value string) ([]byte, error) {
+	length := len(value)
+	if fieldPackager.Encoding == encoding.Binary {
+		length = length / 2
 	}
-	padRight, padLeft := padding.Pack(fieldPackager.Padding, fieldPackager.Length, len(value))
 
+	fieldPrefix, err := prefix.Pack(fieldPackager.Prefix, length)
+	if err != nil {
+		return nil, err
+	}
+
+	padLeft, padRight := padding.Pack(fieldPackager.Padding, fieldPackager.Length, len(value))
 	fieldEncode := encoding.Pack(fieldPackager.Encoding, padLeft+value+padRight)
 
-	return fieldPrefix + fieldEncode, nil
+	return append(fieldPrefix, fieldEncode...), nil
 }
 
 func (f *Field) SetSubField(subFieldId string, value string) {
@@ -115,19 +124,20 @@ func (f *Field) UnpackSubfields(subFields map[string]packager.SubField) error {
 	return nil
 }
 
-func (f *Field) PackSubfields(subFields map[string]packager.SubField) string {
-	var fieldResult string
-
+func (f *Field) PackSubfields(subFields map[string]packager.SubField) []byte {
 	keys := make([]string, 0, len(f.SubFields))
 	for k := range f.SubFields {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
+
+	val := new(bytes.Buffer)
 
 	for i := range keys {
 		f.SetSubField(keys[i], f.SubFields[keys[i]])
-		fieldResult += encoding.PackSubField(subFields[keys[i]].Encoding, f.SubFields[keys[i]])
+		val.Write(encoding.PackSubField(subFields[keys[i]].Encoding, f.SubFields[keys[i]]))
 	}
 
-	return fieldResult
+	return val.Bytes()
 }

@@ -1,29 +1,30 @@
 package encoding
 
 import (
+	"bytes"
 	"testing"
 )
 
 var (
 	Encodings      = []Encoding{Bcd, Ascii, Ebcdic}
-	ValuesEncoding = []string{"000001", "303030303031", "f0f0f0f0f0f1"}
+	ValuesEncoding = [][]byte{{0x00, 0x00, 0x01}, {0x30, 0x30, 0x30, 0x30, 0x30, 0x31}, {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1}}
 )
 
 // TestUnpackEncoding calls message.UnpackEncoding
 func TestUnpackEncoding(t *testing.T) {
 	for e, enc := range Encodings {
-		expectedResult := "000001"
 		data := ValuesEncoding[e]
+		expectedResult := "000001"
 
-		result, _, err := Unpack(enc, data, "011", 0, 6)
+		result, err := Unpack(enc, data)
 		if err != nil {
-			t.Fatalf(`UnpackEncoding(%s) Encoding=%s - Error %s`, data, enc.String(), err.Error())
+			t.Fatalf(`UnpackEncoding(%x) Encoding=%s - Error %s`, data, enc.String(), err.Error())
 		}
 
 		if result != expectedResult {
-			t.Fatalf(`UnpackEncoding(%s) Encoding=%s - Result "%s" does not match "%s"`, data, enc.String(), result, expectedResult)
+			t.Fatalf(`UnpackEncoding(%x) Encoding=%s - Result "%s" does not match "%s"`, data, enc.String(), result, expectedResult)
 		}
-		t.Logf(`UnpackEncoding=%-28s Encoding=%-6s - Result "%-6s" match "%-6s"`, data, enc.String(), result, expectedResult)
+		t.Logf(`UnpackEncoding(%x) Encoding=%s - Result "%s" match "%s"`, data, enc.String(), result, expectedResult)
 	}
 }
 
@@ -35,9 +36,10 @@ func TestPackEncoding(t *testing.T) {
 
 		result := Pack(enc, data)
 
-		if result != expectedResult {
-			t.Fatalf(`PackEncoding(%s) Encoding=%s - Result "%s" does not match "%s"`, data, enc.String(), result, expectedResult)
+		if !bytes.Equal(result, expectedResult) {
+			t.Fatalf(`PackEncoding(%s) Encoding=%s - Result "%x" does not match "%x"`, data, enc.String(), result, expectedResult)
 		}
-		t.Logf(`PackEncoding=%-11s Encoding=%-6s - Result "%-6s" match "%-6s"`, data, enc.String(), result, expectedResult)
+
+		t.Logf(`PackEncoding(%s) Encoding=%s - Result "%x" match "%x"`, data, enc.String(), result, expectedResult)
 	}
 }

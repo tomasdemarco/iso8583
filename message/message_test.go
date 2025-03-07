@@ -1,18 +1,20 @@
 package message
 
 import (
+	"bytes"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager"
 	"github.com/tomasdemarco/iso8583/prefix"
+	"slices"
 	"testing"
 )
 
 var (
 	FieldEncoding       = []encoding.Encoding{encoding.Bcd, encoding.Ascii, encoding.Ebcdic}
-	FieldValuesEncoding = []string{"000001", "303030303031", "f0f0f0f0f0f1"}
+	FieldValuesEncoding = [][]byte{{0x00, 0x00, 0x01}, {0x30, 0x30, 0x30, 0x30, 0x30, 0x31}, {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1}}
 	FieldPrefix         = []prefix.Type{prefix.Fixed, prefix.LL, prefix.LLL}
 	FieldPrefixEncoding = []encoding.Encoding{encoding.Bcd, encoding.Hex, encoding.Ascii, encoding.Ebcdic}
-	FieldPrefixValues   = []string{"", "06", "0006", "", "06", "0006", "", "3036", "303036", "", "f0f6", "f0f0f6"}
+	FieldPrefixValues   = [][]byte{{}, {0x06}, {0x00, 0x06}, {}, {0x06}, {0x00, 0x06}, {}, {0x30, 0x36}, {0x30, 0x30, 0x36}, {}, {0xF0, 0xF6}, {0xF0, 0xF0, 0xF6}}
 )
 
 // TestUnpack calls message.Unpack
@@ -22,7 +24,12 @@ func TestUnpack(t *testing.T) {
 			for p, prefix2 := range FieldPrefix {
 				expectedResult := "000001"
 				expectedBitmap := []string{"011"}
-				data := "02000020000000000000" + FieldPrefixValues[p+(pe*3)] + FieldValuesEncoding[e]
+
+				buf := new(bytes.Buffer)
+				buf.Write([]byte{0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+				buf.Write(FieldPrefixValues[p+(pe*3)])
+				buf.Write(FieldValuesEncoding[e])
+				data := buf.Bytes()
 
 				message := Message{}
 				fieldsPackager := packager.Field{}
@@ -33,7 +40,7 @@ func TestUnpack(t *testing.T) {
 				fields["000"] = fieldsPackager
 
 				fieldsPackager = packager.Field{}
-				fieldsPackager.Length = 16
+				fieldsPackager.Length = 8
 				fieldsPackager.Encoding = encoding.Bcd
 
 				fields["001"] = fieldsPackager
@@ -52,29 +59,26 @@ func TestUnpack(t *testing.T) {
 
 				err := message.Unpack(data)
 				if err != nil {
-					t.Fatalf(`Unpack(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
+					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
 				}
 
 				if len(message.Bitmap) != len(expectedBitmap) {
-					t.Fatalf(`Unpack(%s) - Length bitmap is different - Result "%s" / Expected "%s"`, data, message.Bitmap, expectedBitmap)
+					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Length bitmap is different - Result "%s" / Expected "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), message.Bitmap, expectedBitmap)
 				}
 
-				for i, v := range message.Bitmap {
-					if v != expectedBitmap[i] {
-						t.Fatalf(`Unpack(%s) - Result bitmap "%s" does not match "%s"`, data, message.Bitmap, expectedBitmap)
-
-					}
+				for !slices.Equal(message.Bitmap, expectedBitmap) {
+					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result bitmap "%s" does not match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), message.Bitmap, expectedBitmap)
 				}
 
 				result, err := message.GetField("011")
 				if err != nil {
-					t.Fatalf(`Unpack(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
+					t.Fatalf(`Unpack(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
 				}
 
 				if result != expectedResult {
-					t.Fatalf(`Unpack(%s) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
+					t.Fatalf(`Unpack(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
 				}
-				t.Logf(`Unpack=%-28s Encoding=%-6s - Prefix=%-5s - PrefixEncoding=%-6s - Result "%-6s" match "%-6s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
+				t.Logf(`Unpack=%x Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
 			}
 		}
 	}

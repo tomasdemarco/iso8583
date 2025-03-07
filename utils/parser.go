@@ -28,5 +28,3 @@ func Bin2Hex(s string) string {
 	}
 	return fmt.Sprintf("%x", ui)
 }
-
-

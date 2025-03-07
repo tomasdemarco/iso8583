@@ -395,7 +395,7 @@
 			"type": "STRING",
 			"length": 143,
 			"name": "NATIONAL USE DATA",
-			"encoding": "ANS",
+			"encoding": "BINARY",
 			"prefix": {
 				"type": "LLL",
 				"encoding": "EBCDIC"

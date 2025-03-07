@@ -12,7 +12,7 @@ const (
 	Ascii
 	Ebcdic
 	Hex
-	Ans
+	Binary
 )
 
 var encodingStrings = [...]string{
@@ -20,7 +20,7 @@ var encodingStrings = [...]string{
 	Ascii:  "ASCII",
 	Ebcdic: "EBCDIC",
 	Hex:    "HEX",
-	Ans:    "ANS",
+	Binary: "BINARY",
 }
 
 // String return string

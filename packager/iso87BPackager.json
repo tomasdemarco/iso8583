@@ -1,7 +1,9 @@
 {
 	"name": "ISO87BPackager",
-	"prefixLength": 0,
-	"prefixEncoding": "HEX",
+	"prefix": {
+		"type": "LL",
+		"encoding": "HEX"
+	},
 	"headerLength": 10,
 	"header": null,
 	"headerFile": "headerTpdu.json",
