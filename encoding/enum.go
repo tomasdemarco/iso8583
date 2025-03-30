@@ -8,7 +8,8 @@ import (
 type Encoding int
 
 const (
-	Bcd Encoding = iota
+	None Encoding = iota
+	Bcd
 	Ascii
 	Ebcdic
 	Hex
@@ -16,6 +17,7 @@ const (
 )
 
 var encodingStrings = [...]string{
+	None:   "NONE",
 	Bcd:    "BCD",
 	Ascii:  "ASCII",
 	Ebcdic: "EBCDIC",

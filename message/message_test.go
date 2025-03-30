@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager"
+	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/prefix"
 	"slices"
 	"testing"
@@ -32,20 +33,20 @@ func TestUnpack(t *testing.T) {
 				data := buf.Bytes()
 
 				message := Message{}
-				fieldsPackager := packager.Field{}
+				fieldsPackager := field.Field{}
 				fieldsPackager.Length = 4
 				fieldsPackager.Encoding = encoding.Bcd
 
-				fields := make(map[string]packager.Field)
+				fields := make(map[string]field.Field)
 				fields["000"] = fieldsPackager
 
-				fieldsPackager = packager.Field{}
+				fieldsPackager = field.Field{}
 				fieldsPackager.Length = 8
 				fieldsPackager.Encoding = encoding.Bcd
 
 				fields["001"] = fieldsPackager
 
-				fieldsPackager = packager.Field{}
+				fieldsPackager = field.Field{}
 				fieldsPackager.Length = 6
 				fieldsPackager.Encoding = enc
 				fieldsPackager.Prefix.Type = prefix2

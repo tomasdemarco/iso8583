@@ -70,14 +70,6 @@ var (
 		'\x38', '\x39', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'}
 )
 
-func EbcdicEncode(src string) []byte {
-	var dst []byte
-	for _, v := range []byte(src) {
-		dst = append(dst, asciiToEbcdic[v])
-	}
-	return dst
-}
-
 func EbcdicDecode(src []byte) string {
 	var dst []byte
 	for _, v := range src {
@@ -85,4 +77,12 @@ func EbcdicDecode(src []byte) string {
 	}
 
 	return string(dst)
+}
+
+func EbcdicEncode(src string) []byte {
+	var dst []byte
+	for _, v := range []byte(src) {
+		dst = append(dst, asciiToEbcdic[v])
+	}
+	return dst
 }

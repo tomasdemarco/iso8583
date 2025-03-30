@@ -8,25 +8,26 @@ import (
 func Unpack(encoding Encoding, value []byte) (string, error) {
 	switch encoding {
 	case Ascii:
-		result, err := AsciiDecode(value)
-		return result, err
+		return AsciiDecode(value)
 	case Ebcdic:
-		result := EbcdicDecode(value)
-		return result, nil
+		return EbcdicDecode(value), nil
+	case Bcd:
+		return BcdDecode(value)
 	default:
 		return fmt.Sprintf("%x", value), nil
 	}
 }
 
-func Pack(encoding Encoding, value string) []byte {
+func Pack(encoding Encoding, value string) ([]byte, error) {
 	switch encoding {
 	case Ascii:
-		result := AsciiEncode(value)
-		return result
+		return AsciiEncode(value), nil
 	case Ebcdic:
-		return EbcdicEncode(value)
+		return EbcdicEncode(value), nil
+	case Bcd:
+		return BcdEncode(value)
 	default:
-		return utils.Hex2Byte(value)
+		return utils.Hex2Byte(value), nil
 	}
 }
 

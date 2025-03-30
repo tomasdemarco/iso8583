@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager"
+	pkgField "github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/prefix"
 	"testing"
 )
@@ -24,7 +25,7 @@ func TestUnpackField(t *testing.T) {
 				expectedResult := "000001"
 				data := append(FieldPrefixValues[p+(pe*3)], FieldValuesEncoding[e]...)
 
-				fieldsPackager := packager.Field{}
+				fieldsPackager := pkgField.Field{}
 				fieldsPackager.Length = 6
 				fieldsPackager.Encoding = fieldEncoding
 				if fieldPrefix != prefix.Fixed {
@@ -32,13 +33,13 @@ func TestUnpackField(t *testing.T) {
 					fieldsPackager.Prefix.Encoding = prefixEncoding
 				}
 
-				fields := make(map[string]packager.Field)
+				fields := make(map[string]pkgField.Field)
 				fields["011"] = fieldsPackager
 
 				pkg := packager.Packager{}
 				pkg.Fields = fields
 
-				result, _, err := Unpack(fieldsPackager, data, 0, "011")
+				result, _, err := Unpack(fieldsPackager, data, 0)
 				if err != nil {
 					t.Fatalf(`UnpackField(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, fieldEncoding.String(), fieldPrefix.String(), prefixEncoding.String(), err.Error())
 				}
@@ -60,7 +61,7 @@ func TestPackField(t *testing.T) {
 				data := "000001"
 				expectedResult := append(FieldPrefixValues[p+(pe*3)], FieldValuesEncoding[e]...)
 
-				fieldsPackager := packager.Field{}
+				fieldsPackager := pkgField.Field{}
 				fieldsPackager.Length = 6
 				fieldsPackager.Encoding = fieldEncoding
 				if fieldPrefix != prefix.Fixed {
@@ -68,7 +69,7 @@ func TestPackField(t *testing.T) {
 					fieldsPackager.Prefix.Encoding = prefixEncoding
 				}
 
-				fields := make(map[string]packager.Field)
+				fields := make(map[string]pkgField.Field)
 				fields["011"] = fieldsPackager
 
 				pkg := packager.Packager{}

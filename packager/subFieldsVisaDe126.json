@@ -1,9 +1,8 @@
 {
     "00": {
         "name": "Bitmap",
-        "type": "STRING",
+        "type": "BITMAP",
         "length": 16,
-        "pattern": "^{16}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -12,7 +11,6 @@
         "name": "Visa Merchant Identifier",
         "type": "NUMBER",
         "length": 16,
-        "pattern": "^{16}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -21,7 +19,6 @@
         "name": "Cardholder Certificate Serial Number",
         "type": "STRING",
         "length": 34,
-        "pattern": "^{34}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -30,7 +27,6 @@
         "name": "Merchant Certificate Serial Number",
         "type": "STRING",
         "length": 34,
-        "pattern": "^{34}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -39,7 +35,6 @@
         "name": "Transaction ID (XID)",
         "type": "STRING",
         "length": 40,
-        "pattern": "^{40}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -48,7 +43,6 @@
         "name": "CAVV Data",
         "type": "STRING",
         "length": 40,
-        "pattern": "^{40}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -57,7 +51,6 @@
         "name": "CVV2 Authorization Request Data and American Express CID Data",
         "type": "STRING",
         "length": 12,
-        "pattern": "^{12}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -66,7 +59,6 @@
         "name": "Service Indicators",
         "type": "STRING",
         "length": 6,
-        "pattern": "^{6}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -75,7 +67,6 @@
         "name": "POS Environment",
         "type": "NUMBER",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -84,7 +75,6 @@
         "name": "Mastercard UCAF Collection Indicator",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -93,7 +83,6 @@
         "name": " Mastercard UCAF Field",
         "type": "STRING",
         "length": 66,
-        "pattern": "^{66}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -102,7 +91,6 @@
         "name": " Agent Unique Account Result",
         "type": "STRING",
         "length": 24,
-        "pattern": "^{24}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
@@ -111,7 +99,6 @@
         "name": "Dynamic Currency Conversion Indicator",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
@@ -120,7 +107,6 @@
         "name": "3-D Secure Indicator",
         "type": "NUMBER",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null

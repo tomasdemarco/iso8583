@@ -1,4 +1,4 @@
-package prefix
+package suffix
 
 import (
 	"encoding/json"
@@ -46,5 +46,5 @@ func (t *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid type prefix: %s", j)
+	return fmt.Errorf("invalid type suffix: %s", j)
 }

@@ -1,153 +1,136 @@
 {
     "00": {
-        "name": "Bitmap",
-        "type": "STRING",
+        "description": "Bitmap",
+        "type": "BITMAP",
         "length": 16,
-        "pattern": "^{16}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
     },
     "01": {
-        "name": "Authorization Characteristics Indicator",
+        "description": "Authorization Characteristics Indicator",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "02": {
-        "name": "Transaction Identifier",
+        "description": "Transaction Identifier",
         "type": "STRING",
         "length": 16,
-        "pattern": "^{16}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
     },
     "03": {
-        "name": "Validation Code",
+        "description": "Validation Code",
         "type": "STRING",
         "length": 4,
-        "pattern": "^{4}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "04": {
-        "name": "Market-Specific Data Identifier",
+        "description": "Market-Specific Data Identifier",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "05": {
-        "name": "Duration",
+        "description": "Duration",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
     },
     "06": {
-        "name": "Reserved",
+        "description": "Reserved",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "07": {
-        "name": "Purchase Identifier",
+        "description": "Purchase Identifier",
         "type": "STRING",
         "length": 26,
-        "pattern": "^{26}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "16": {
-        "name": "Reserved",
+        "description": "Reserved",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "17": {
-        "name": " Mastercard Interchange Compliance",
+        "description": " Mastercard Interchange Compliance",
         "type": "NUMBER",
         "length": 15,
-        "pattern": "^{15}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "20": {
-        "name": "Merchant Verification Value",
+        "description": "Merchant Verification Value",
         "type": "STRING",
         "length": 10,
-        "pattern": "^{10}$",
         "encoding": "BCD",
         "prefix": null,
         "padding": null
     },
     "21": {
-        "name": "Online Risk Assessment Risk Score and Reason Codes",
+        "description": "Online Risk Assessment Risk Score and Reason Codes",
         "type": "STRING",
         "length": 8,
-        "pattern": "^{8}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "22": {
-        "name": "Online Risk Assessment Condition Codes",
+        "description": "Online Risk Assessment Condition Codes",
         "type": "STRING",
         "length": 12,
-        "pattern": "^{12}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "23": {
-        "name": "Product ID",
+        "description": "Product ID",
         "type": "STRING",
         "length": 4,
-        "pattern": "^{4}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "24": {
-        "name": "Program Identifier",
+        "description": "Program Identifier",
         "type": "STRING",
         "length": 12,
-        "pattern": "^{12}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "25": {
-        "name": "Spend Qualified Indicator",
+        "description": "Spend Qualified Indicator",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null
     },
     "26": {
-        "name": "Account Status",
+        "description": "Account Status",
         "type": "STRING",
         "length": 2,
-        "pattern": "^{2}$",
         "encoding": "EBCDIC",
         "prefix": null,
         "padding": null

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func BitmapDecode(value []byte) ([]string, error) {
+func BitmapDecode(value []byte, initBit int) ([]string, error) {
 
 	primaryBitmap, err := strconv.ParseUint(fmt.Sprintf("%x", value[:8]), 16, 64)
 	if err != nil {
@@ -26,9 +26,9 @@ func BitmapDecode(value []byte) ([]string, error) {
 
 	sliceBitmap := make([]string, 0)
 
-	for i := 1; i <= len(bitmapBinary); i++ {
-		if bitmapBinary[i-1:i] == "1" {
-			str := fmt.Sprintf("%03d", i)
+	for i := 0; i < len(bitmapBinary); i++ {
+		if bitmapBinary[i] == '1' {
+			str := fmt.Sprintf("%03d", i+initBit)
 			sliceBitmap = append(sliceBitmap, str)
 		}
 	}
