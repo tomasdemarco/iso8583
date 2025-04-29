@@ -1,554 +1,569 @@
 {
-	"name": "ISO87EMasterPackager",
-	"prefixLength": 4,
+	"description": "iso87EMasterPackager",
+	"prefix": {
+		"type": "LLLL",
+		"encoding": "HEX"
+	},
 	"header": null,
 	"headerLength": 0,
-	"prefixEncoding": "HEXN",
 	"fields": {
 		"000": {
-			"type": "String",
+			"description": "Message Type Indicator",
+			"type": "STRING",
 			"length": 4,
-			"name": "Message Type Indicator",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"001": {
-			"type": "Bitmap",
+			"description": "Bitmap",
+			"type": "BITMAP",
 			"length": 16,
-			"name": "Bitmap",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"002": {
-			"type": "String",
+			"description": "Primary Account Number",
+			"type": "STRING",
 			"length": 19,
-			"name": "Primary Account Number",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"003": {
-			"type": "Numeric",
+			"description": "Processing Code",
+			"type": "NUMERIC",
 			"length": 6,
-			"name": "Processing Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "RIGHT",
 				"pad": "0"
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"004": {
-			"type": "String",
+			"description": "Transaction Amount",
+			"type": "STRING",
 			"length": 12,
-			"name": "Transaction Amount",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"005": {
-			"type": "String",
+			"description": "Settlement Amount",
+			"type": "STRING",
 			"length": 12,
-			"name": "Settlement Amount",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"006": {
-			"type": "String",
+			"description": "Billing Amount",
+			"type": "STRING",
 			"length": 12,
-			"name": "Billing Amount",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"007":{
-			"type": "String",
+			"description": "Transmission Date & Time",
+			"type": "STRING",
 			"length": 10,
-			"name": "Transmission Date & Time",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"009":{
-			"type": "String",
+			"description": "Cardholder Billing Conversion Rate",
+			"type": "STRING",
 			"length": 8,
-			"name": "Cardholder Billing Conversion Rate",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"010":{
-			"type": "String",
+			"description": "Cardholder Billing Conversion Rate",
+			"type": "STRING",
 			"length": 8,
-			"name": "Cardholder Billing Conversion Rate",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"011": {
-			"type": "String",
+			"description": "Systems Trace Audit Number (STAN)",
+			"type": "STRING",
 			"length": 6,
-			"name": "Systems Trace Audit Number (STAN)",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"012": {
-			"type": "String",
+			"description": "Local Transaction Time",
+			"type": "STRING",
 			"length": 6,
-			"name": "Local Transaction Time",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"013": {
-			"type": "String",
+			"description": "Local Transaction Date",
+			"type": "STRING",
 			"length": 4,
-			"name": "Local Transaction Date",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"014": {
-			"type": "String",
+			"description": "Expiration Date",
+			"type": "STRING",
 			"length": 4,
-			"name": "Expiration Date",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"015": {
-			"type": "String",
+			"description": "Settlement Date",
+			"type": "STRING",
 			"length": 4,
-			"name": "Settlement Date",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"016": {
-			"type": "String",
+			"description": "Currency Conversion Date",
+			"type": "STRING",
 			"length": 4,
-			"name": "Currency Conversion Date",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"018": {
-			"type": "String",
+			"description": "Merchant Type",
+			"type": "STRING",
 			"length": 4,
-			"name": "Merchant Type",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"019": {
-			"type": "String",
+			"description": "Acquiring Institution Country Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Acquiring Institution Country Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"022": {
-			"type": "String",
+			"description": "Point of Sale (POS) Entry Mode",
+			"type": "STRING",
 			"length": 3,
-			"name": "Point of Sale (POS) Entry Mode",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"023": {
-			"type": "String",
+			"description": "Card Sequence Number (CSN)",
+			"type": "STRING",
 			"length": 3,
-			"name": "Card Sequence Number (CSN)",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"024": {
-			"type": "String",
+			"description": "Function Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Function Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"025": {
-			"type": "String",
+			"description": "Point of Service Condition Code",
+			"type": "STRING",
 			"length": 2,
-			"name": "Point of Service Condition Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"032": {
-			"type": "String",
+			"description": "Acquiring Institution Identification Code",
+			"type": "STRING",
 			"length": 11,
-			"name": "Acquiring Institution Identification Code",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"033": {
-			"type": "String",
+			"description": "Forwarding Institution Identification Code",
+			"type": "STRING",
 			"length": 11,
-			"name": "Forwarding Institution Identification Code",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"035": {
-			"type": "String",
+			"description": "Track 2 Data",
+			"type": "STRING",
 			"length": 37,
-			"name": "Track 2 Data",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"037": {
-			"type": "String",
+			"description": "Retrieval Reference Number",
+			"type": "STRING",
 			"length": 12,
-			"name": "Retrieval Reference Number",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"038": {
-			"type": "String",
+			"description": "Authorization Identification Response",
+			"type": "STRING",
 			"length": 6,
-			"name": "Authorization Identification Response",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"039": {
-			"type": "String",
+			"description": "Response Code",
+			"type": "STRING",
 			"length": 2,
-			"name": "Response Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"041": {
-			"type": "String",
+			"description": "Card Acceptor Terminal Identification",
+			"type": "STRING",
 			"length": 8,
-			"name": "Card Acceptor Terminal Identification",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"042": {
-			"type": "String",
+			"description": "Card Acceptor Identification Code",
+			"type": "STRING",
 			"length": 15,
-			"name": "Card Acceptor Identification Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": {
-				"type": "FIXED",
+				"type": "FILL",
 				"position": "RIGHT",
 				"pad": " "
 			},
-			"subFields": null
+			"subFieldsData": null
 		},
 		"043": {
-			"type": "String",
+			"description": "Card Acceptor Name/Location",
+			"type": "STRING",
 			"length": 40,
-			"pattern": "^[0-9a-zA-Z\\s\\*]{40}$",
-			"name": "Card Acceptor Name/Location",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"044": {
-			"type": "String",
+			"description": "Additional Data",
+			"type": "STRING",
 			"length": 99,
-			"name": "Additional Data",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"045": {
-			"type": "String",
+			"description": "Track 1 Data",
+			"type": "STRING",
 			"length": 76,
-			"name": "Track 1 Data",
-			"encoding": "EBCDICN",
-			"prefix": "LL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"046": {
-			"type": "String",
+			"description": "Additional data (ISO)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Additional data (ISO)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"048": {
-			"type": "String",
+			"description": "Additional data (Private)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Additional data (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"049": {
-			"type": "String",
+			"description": "Transaction Currency Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Transaction Currency Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"050": {
-			"type": "String",
+			"description": "Settlement Currency Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Settlement Currency Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"051": {
-			"type": "String",
+			"description": "Cardholder Billing Currency Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Cardholder Billing Currency Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"052": {
-			"type": "String",
+			"description": "PIN Data",
+			"type": "STRING",
 			"length": 16,
-			"name": "PIN Data",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"053": {
-			"type": "String",
+			"description": "Security Related Control Information",
+			"type": "STRING",
 			"length": 16,
-			"name": "Security Related Control Information",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"054": {
-			"type": "String",
+			"description": "Additional Amounts",
+			"type": "STRING",
 			"length": 120,
-			"name": "Additional Amounts",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"055": {
-			"type": "String",
+			"description": "ICC Data - EMV Having Multiple Tags",
+			"type": "STRING",
 			"length": 255,
-			"name": "ICC Data - EMV Having Multiple Tags",
 			"encoding": "BCD",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICS",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"059": {
-			"type": "String",
+			"description": "Reserved (National)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (National)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"060": {
-			"type": "String",
+			"description": "Reserved (National)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (National)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"061": {
-			"type": "String",
+			"description": "Reserved (Private)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"062": {
-			"type": "String",
+			"description": "Reserved (Private)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"063": {
-			"type": "String",
+			"description": "Network Data",
+			"type": "STRING",
 			"length": 999,
-			"name": "Network Data",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"070": {
-			"type": "String",
+			"description": "Network Management Information Code",
+			"type": "STRING",
 			"length": 3,
-			"name": "Network Management Information Code",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"090": {
-			"type": "String",
+			"description": "Reserved (Private)",
+			"type": "STRING",
 			"length": 42,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"encoding": "EBCDIC",
+			"prefix": null,
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"121": {
-			"type": "String",
+			"description": "Reserved (Private)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
+		},
+		"122": {
+			"description": "Reserved (Private)",
+			"type": "STRING",
+			"length": 999,
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
+			"padding": null,
+			"subFieldsData": null
 		},
 		"124": {
-			"type": "String",
+			"description": "Reserved (Private)",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"126": {
-			"type": "String",
+			"type": "STRING",
 			"length": 999,
-			"name": "Reserved (Private)",
-			"encoding": "EBCDICN",
-			"prefix": "LLL",
-			"prefixEncoding": "EBCDICN",
+			"description": "Reserved (Private)",
+			"encoding": "EBCDIC",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "EBCDIC"
+			},
 			"padding": null,
-			"subFields": null
+			"subFieldsData": null
 		}
 	}
 }

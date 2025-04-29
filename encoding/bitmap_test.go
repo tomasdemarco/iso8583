@@ -10,7 +10,7 @@ func TestBitmapDecode(t *testing.T) {
 	data := []byte{0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	expectedResult := []string{"011"}
 
-	result, err := BitmapDecode(data)
+	result, err := BitmapDecode(data, 1)
 	if err != nil {
 		t.Fatalf(`BitmapDecode(%s) - Error %s`, data, err.Error())
 	}

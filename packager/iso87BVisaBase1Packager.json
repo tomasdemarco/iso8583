@@ -1,629 +1,515 @@
 {
-	"name": "ISO87BVisaBase1Packager",
-	"prefixLength": 8,
-	"prefixEncoding": "HEX",
+	"description": "Iso87BVisaBase1Packager",
+	"prefix": {
+		"type": "LLLLLLLL",
+		"encoding": "HEX"
+	},
 	"headerLength": 44,
 	"header": null,
 	"headerFile": "headerVisaBase1.json",
 	"fields": {
 		"000": {
+			"description": "Message Type Indicator",
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^(0100|0110|0200|0210|0400|0410|0420|0430|0500|0510|0800|0810)$",
-			"name": "Message Type Indicator",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"001": {
-			"type": "Bitmap",
+			"description": "Secondary Bitmap",
+			"type": "BITMAP",
 			"length": 16,
-			"pattern": "^[0-9a-fA-F]{16,32}$",
-			"name": "Bitmap",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"002": {
-			"type": "NUMBER",
+			"description": "Primary Account Number",
+			"type": "NUMERIC",
 			"length": 19,
-			"pattern": "^[0-9]{13,19}$",
-			"name": "Primary Account Number",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "HEX"
+			},
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"003": {
-			"type": "NUMBER",
+			"description": "Processing Code",
+			"type": "NUMERIC",
 			"length": 6,
-			"pattern": "^[0-9]{6}$",
-			"name": "Processing Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "FIXED",
 				"position": "RIGHT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"004": {
+			"description": "Transaction Amount",
 			"type": "STRING",
 			"length": 12,
-			"pattern": "^[0-9]{12}$",
-			"name": "Transaction Amount",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "FIXED",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"007":{
+			"description": "Transmission Date & Time",
 			"type": "STRING",
 			"length": 10,
-			"pattern": "^\\d{2}\\d{2}\\d{2}\\d{2}\\d{2}$",
-			"name": "Transmission Date & Time",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"011": {
+			"description": "Systems Trace Audit Number (STAN)",
 			"type": "STRING",
 			"length": 6,
-			"pattern": "^[0-9]{6}$",
-			"name": "Systems Trace Audit Number (STAN)",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "FIXED",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"012": {
+			"description": "Local Transaction Time",
 			"type": "STRING",
 			"length": 6,
-			"pattern": "^\\d{2}\\d{2}\\d{2}$",
-			"name": "Local Transaction Time",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"013": {
+			"description": "Local Transaction Date",
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^\\d{2}\\d{2}$",
-			"name": "Local Transaction Date",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"014": {
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^\\d{2}\\d{2}$",
-			"name": "Expiration Date",
+			"description": "Expiration Date",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null
+			"subFieldsData": null
 		},
 		"015": {
+			"description": "Settlement Date",
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^\\d{2}\\d{2}$",
-			"name": "Settlement Date",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"018": {
+			"description": "Merchant Type",
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^[0-9]{4}$",
-			"name": "Merchant Type",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"019": {
+			"description": "Acquiring Institution Country Code",
 			"type": "STRING",
 			"length": 3,
-			"pattern": "^[0-9]{3}$",
-			"name": "Acquiring Institution Country Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"022": {
+			"description": "Point of Sale (POS) Entry Mode",
 			"type": "STRING",
 			"length": 4,
-			"pattern": "^[0-9]{4}$",
-			"name": "Point of Sale (POS) Entry Mode",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"023": {
-			"type": "STRING",
-			"length": 3,			
-			"pattern": "^[0-9]{3}$",
-			"name": "Card Sequence Number (CSN)",
-			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
-			"padding": {
-				"type": "PARITY",
-				"position": "LEFT",
-				"pad": "0"
-			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
-		},
-		"024": {
+			"description": "Card Sequence Number (CSN)",
 			"type": "STRING",
 			"length": 3,
-			"pattern": "^[0-9]{3}$",
-			"name": "Function Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
+		},
+		"024": {
+			"description": "Function Code",
+			"type": "STRING",
+			"length": 3,
+			"encoding": "BCD",
+			"prefix": null,
+			"padding": {
+				"type": "PARITY",
+				"position": "LEFT",
+				"pad": "0"
+			},
+			"subFieldsData": null
 		},
 		"025": {
+			"description": "Point of Service Condition Code",
 			"type": "STRING",
 			"length": 2,
-			"pattern": "^[0-9]{2}$",
-			"name": "Point of Service Condition Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"032": {
-			"type": "NUMBER",
+			"description": "Acquiring Institution Identification Code",
+			"type": "NUMERIC",
 			"length": 11,
-			"pattern": "^[0-9a-zA-Z\\s]{0,11}$",
-			"name": "Acquiring Institution Identification Code",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": {
 				"type": "PARITY",
 				"position": "RIGHT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"035": {
-			"type": "NUMBER",
+			"description": "Track II",
+			"type": "NUMERIC",
 			"length": 37,
-			"pattern": "^([0-9]{1,19})[=Dd]([0-9]{4})?([0-9]{3})?([0-9]{4})?([0-9]{1,})?$",
-			"name": "Track 2 Data",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"037": {
-			"type": "NUMBER",
+			"description": "Retrieval Reference Number",
+			"type": "NUMERIC",
 			"length": 12,
-			"pattern": "^[0-9]{12}$",
-			"name": "Retrieval Reference NUMBER",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"038": {
-			"type": "NUMBER",
+			"description": "Authorization Identification Response",
+			"type": "NUMERIC",
 			"length": 6,
-			"pattern": "^[0-9]{6}$",
-			"name": "Authorization Identification Response",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"039": {
+			"description": "Response Code",
 			"type": "STRING",
 			"length": 2,
-			"pattern": "^[0-9]{2}$",
-			"name": "Response Code",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"041": {
+			"description": "Card Acceptor Terminal Identification",
 			"type": "STRING",
 			"length": 8,
-			"pattern": "^[0-9\\s]{8}$",
-			"name": "Card Acceptor Terminal Identification",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"042": {
+			"description": "Card Acceptor Identification Code",
 			"type": "STRING",
 			"length": 15,
-			"pattern": "^[0-9\\s]{15}$",
-			"name": "Card Acceptor Identification Code",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "FIXED",
 				"position": "RIGHT",
 				"pad": " "
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"043": {
+			"description": "Card Acceptor Name/Location",
 			"type": "STRING",
 			"length": 40,
-			"pattern": "^[0-9a-zA-Z\\s\\*]{40}$",
-			"name": "Card Acceptor Name/Location",
 			"encoding": "EBCDIC",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"044": {
-			"type": "NUMBER",
+			"description": "Additional Data",
+			"type": "NUMERIC",
 			"length": 99,
-			"pattern": "^[0-9a-zA-Z\\s]{0,99}$",
-			"name": "Additional Data",
 			"encoding": "EBCDIC",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"045": {
+			"description": "Track I",
 			"type": "STRING",
 			"length": 76,
-			"pattern": "^[%]?[A-Z]+([0-9]{1,19})\\^([^\\^]{2,26})\\^([0-9]{4})([0-9]{3})([0-9]{4})?([0-9]{1,10})?",
-			"name": "Track 1 Data",
 			"encoding": "ASCII",
-			"prefix": "LL",
-			"prefixEncoding": "BCD",
+			"prefix": {
+				"type": "LL",
+				"encoding": "BCD"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"046": {
+			"description": "Additional data (ISO)",
 			"type": "STRING",
 			"length": 999,
-			"pattern": "^{0,45}$",
-			"name": "Additional data (ISO)",
 			"encoding": "ASCII",
-			"prefix": "LLL",
-			"prefixEncoding": "BCD",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "BCD"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"048": {
+			"description": "Additional data (Private)",
 			"type": "STRING",
 			"length": 999,
-			"pattern": "^{0,16}$",
-			"name": "Additional data (Private)",
 			"encoding": "ASCII",
-			"prefix": "LLL",
-			"prefixEncoding": "BCD",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "BCD"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"049": {
+			"description": "Transaction Currency Code",
 			"type": "STRING",
 			"length": 3,
-			"pattern": "^[0-9]{3}$",
-			"name": "Transaction Currency Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"052": {
+			"description": "PIN Data",
 			"type": "STRING",
 			"length": 8,
-			"pattern": "^[0-9a-fA-F]{8}$",
-			"name": "PIN Data",
 			"encoding": "ASCII",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"053": {
+			"description": "Security Related Control Information",
 			"type": "STRING",
 			"length": 16,
-			"pattern": "^[0-9a-fA-F]{16}$",
-			"name": "Security Related Control Information",
 			"encoding": "ASCII",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"054": {
+			"description": "Additional Amounts",
 			"type": "STRING",
 			"length": 12,
-			"pattern": "^[0-9]{0,12}$",
-			"name": "Additional Amounts",
 			"encoding": "ASCII",
-			"prefix": "LLL",
-			"prefixEncoding": "BCD",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "BCD"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"055": {
+			"description": "ICC Data - EMV Having Multiple Tags",
 			"type": "STRING",
 			"length": 255,
-			"pattern": "^[0-9a-fA-F]{0,255}$",
-			"name": "ICC Data - EMV Having Multiple Tags",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"059": {
+			"description": "Reserved (National)",
 			"type": "STRING",
 			"length": 999,
-			"pattern": "^{0,500}$",
-			"name": "Reserved (National)",
 			"encoding": "ASCII",
-			"prefix": "LLL",
-			"prefixEncoding": "BCD",
+			"prefix": {
+				"type": "LLL",
+				"encoding": "BCD"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"060": {
+			"description": "Reserved (National)",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Reserved (National)",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"061": {
+			"description": "Reserved (Private)",
 			"type": "STRING",
 			"length": 36,
-			"pattern": "^{0,36}$",
-			"name": "Reserved (Private)",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"062": {
+			"description": "Reserved (Private)",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Reserved (Private)",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": "subFieldsVisaDe62.json",
-			"subFieldsFormat": "BITMAP",
-			"subFields": null
+			"subFieldsData": {
+				"format": "BITMAP",
+				"file": "subFieldsVisaDe62.json"
+			}
 		},
 		"063": {
+			"description": "Reserved (Private)",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Reserved (Private)",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": "subFieldsVisaDe63.json",
-			"subFieldsFormat": "BITMAP",
-			"subFields": null
+			"subFieldsData": {
+				"format": "BITMAP",
+				"file": "subFieldsVisaDe63.json"
+			}
 		},
 		"070": {
+			"description": "Network Management Information Code",
 			"type": "STRING",
 			"length": 3,
-			"pattern": "^[0-9]{3}$",
-			"name": "Network Management Information Code",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": "HEX",
+			"prefix": null,
 			"padding": {
 				"type": "PARITY",
 				"position": "LEFT",
 				"pad": "0"
 			},
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"090": {
+			"description": "Original Data Elements",
 			"type": "STRING",
 			"length": 42,
-			"pattern": "^[0-9a-zA-Z\\s\\*]{42}$",
-			"name": "Original Data Elements",
 			"encoding": "BCD",
-			"prefix": "FIXED",
-			"prefixEncoding": null,
+			"prefix": null,
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": null,
-			"subFields": null
+			"subFieldsData": null
 		},
 		"104": {
+			"description": "Transaction Description and Transaction-Specific Data",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Transaction Description and Transaction-Specific Data",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": "TLV",
-			"subFields": null
+			"subFieldsData": null
 		},
 		"114": {
+			"description": "Domestic and Localized Data",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Domestic and Localized Data",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
-			"padding": null,
-			"subFieldsFile": null,
-			"subFieldsFormat": "TLV",
-			"subFields": null
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
+			"subFieldsData": null
 		},
 		"126": {
+			"description": "Visa Private-Use Fields",
 			"type": "STRING",
 			"length": 99,
-			"pattern": "^{0,99}$",
-			"name": "Visa Private-Use Fields",
 			"encoding": "BCD",
-			"prefix": "LL",
-			"prefixEncoding": "HEX",
+			"prefix": {
+				"type": "LL",
+				"encoding": "HEX"
+			},
 			"padding": null,
-			"subFieldsFile": "subFieldsVisaDe126.json",
-			"subFieldsFormat": "BITMAP",
-			"subFields": null
+			"subFieldsData": {
+				"format": "BITMAP",
+				"file": "subFieldsVisaDe126.json"
+			}
 		}
 	}
 }

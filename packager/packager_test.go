@@ -14,7 +14,7 @@ func TestLoadFromJson(t *testing.T) {
 
 	t.Logf(`TestLoadFromJson - packager "%s" uploaded successfully`, fileName)
 
-	fileName = "iso87EAmexPackager.json"
+	fileName = "iso93EAmexPackager.json"
 
 	_, err = LoadFromJson("./", fileName)
 	if err != nil {

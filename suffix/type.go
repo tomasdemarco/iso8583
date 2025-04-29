@@ -1,4 +1,4 @@
-package prefix
+package suffix
 
 import (
 	"encoding/json"
@@ -9,22 +9,16 @@ type Type int
 
 const (
 	Fixed Type = iota
-	L
 	LL
 	LLL
 	LLLL
-	LLLLL
-	LLLLLL
 )
 
 var typeStrings = [...]string{
-	Fixed:  "FIXED",
-	L:      "L",
-	LL:     "LL",
-	LLL:    "LLL",
-	LLLL:   "LLLL",
-	LLLLL:  "LLLLL",
-	LLLLLL: "LLLLLL",
+	Fixed: "FIXED",
+	LL:    "LL",
+	LLL:   "LLL",
+	LLLL:  "LLLL",
 }
 
 // String return string
@@ -52,5 +46,5 @@ func (t *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid type prefix: %s", j)
+	return fmt.Errorf("invalid type suffix: %s", j)
 }

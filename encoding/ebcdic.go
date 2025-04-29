@@ -70,19 +70,32 @@ var (
 		'\x38', '\x39', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'}
 )
 
-func EbcdicEncode(src string) []byte {
+// EBCDIC implements the Encoder interface for EBCDIC encoding.
+type EBCDIC struct {
+	length int
+}
+
+func NewEbcdicEncoder() EBCDIC {
+	return EBCDIC{}
+}
+
+func (e *EBCDIC) Encode(src string) ([]byte, error) {
 	var dst []byte
 	for _, v := range []byte(src) {
 		dst = append(dst, asciiToEbcdic[v])
 	}
-	return dst
+	return dst, nil
 }
 
-func EbcdicDecode(src []byte) string {
+func (e *EBCDIC) Decode(src []byte) (string, error) {
 	var dst []byte
-	for _, v := range src {
+	for _, v := range src[:e.length] {
 		dst = append(dst, ebcdicToAscii[v])
 	}
 
-	return string(dst)
+	return string(dst), nil
+}
+
+func (e *EBCDIC) SetLength(length int) {
+	e.length = length
 }

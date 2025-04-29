@@ -1,73 +1,72 @@
-package prefix
+package suffix
 
 import (
 	enc "github.com/tomasdemarco/iso8583/encoding"
 )
 
-type Prefix struct {
+type Suffix struct {
 	Type     Type         `json:"type"`
 	Encoding enc.Encoding `json:"encoding"`
-	Hex      bool         `json:"hex"`
 }
 
-//func Unpack(prefix Prefix, messageRaw []byte) (int, int, error) {
-//	if prefix.Type == Fixed {
+//func Unpack(suffix Suffix, messageRaw []byte) (int, int, error) {
+//	if suffix.Type == Fixed {
 //		return 0, 0, nil
 //	}
 //
-//	prefixLength := GetPrefixLen(prefix.Type, prefix.Encoding)
+//	suffixLength := GetSuffixLen(suffix.Type, suffix.Encoding)
 //
-//	if len(messageRaw) < prefixLength {
-//		return 0, 0, errors.New("index out of range while trying to unpack prefix")
+//	if len(messageRaw) < suffixLength {
+//		return 0, 0, errors.New("index out of range while trying to unpack suffix")
 //	}
 //
-//	switch prefix.Encoding {
+//	switch suffix.Encoding {
 //	case enc.Ascii:
-//		lengthString, err := ascii.Decode(messageRaw[:prefixLength])
+//		lengthString, err := ascii.Decode(messageRaw[:suffixLength])
 //		length, err := strconv.Atoi(lengthString)
 //		if err != nil {
 //			return 0, 0, err
 //		}
 //
-//		return length, prefixLength, nil
+//		return length, suffixLength, nil
 //	case enc.Hex:
-//		lengthString, _ := enc.HexDecode(messageRaw[:prefixLength])
+//		lengthString, _ := enc.HexDecode(messageRaw[:suffixLength])
 //		length, err := strconv.Atoi(lengthString)
 //		if err != nil {
 //			fmt.Println(err)
 //		}
 //
-//		return length, prefixLength, nil
+//		return length, suffixLength, nil
 //	case enc.Ebcdic:
-//		lengthString := enc.EbcdicDecode(messageRaw[:prefixLength])
+//		lengthString := enc.EbcdicDecode(messageRaw[:suffixLength])
 //
 //		length, err := strconv.Atoi(lengthString)
 //		if err != nil {
 //			return 0, 0, err
 //		}
 //
-//		return length, prefixLength, nil
+//		return length, suffixLength, nil
 //	default:
-//		length, err := strconv.Atoi(fmt.Sprintf("%x", messageRaw[:prefixLength]))
+//		length, err := strconv.Atoi(fmt.Sprintf("%x", messageRaw[:suffixLength]))
 //		if err != nil {
 //			fmt.Println(err)
 //		}
 //
-//		return length, prefixLength, nil
+//		return length, suffixLength, nil
 //	}
 //}
 //
-//func Pack(prefix Prefix, value int) ([]byte, error) {
-//	if prefix.Type == Fixed {
+//func Pack(suffix Suffix, value int) ([]byte, error) {
+//	if suffix.Type == Fixed {
 //		return nil, nil
 //	}
 //
-//	switch prefix.Encoding {
+//	switch suffix.Encoding {
 //	case enc.Ascii:
-//		if prefix.Type == LLLL {
+//		if suffix.Type == LLLL {
 //			return ascii.Encode(fmt.Sprintf("%04d", value)), nil
 //		}
-//		if prefix.Type == LLL {
+//		if suffix.Type == LLL {
 //			return ascii.Encode(fmt.Sprintf("%03d", value)), nil
 //		} else {
 //			return ascii.Encode(fmt.Sprintf("%02d", value)), nil
@@ -77,17 +76,17 @@ type Prefix struct {
 //		if err != nil {
 //			return nil, err
 //		}
-//		if prefix.Type == LLL || prefix.Type == LLLL {
+//		if suffix.Type == LLL || suffix.Type == LLLL {
 //			return utils.Hex2Byte(fmt.Sprintf("%04s", valueEnc)), nil
 //		} else {
 //			return utils.Hex2Byte(fmt.Sprintf("%02s", valueEnc)), nil
 //		}
 //	case enc.Ebcdic:
-//		if prefix.Type == LLLL {
+//		if suffix.Type == LLLL {
 //			valueEnc := enc.EbcdicEncode(fmt.Sprintf("%04d", value))
 //
 //			return valueEnc, nil
-//		} else if prefix.Type == LLL {
+//		} else if suffix.Type == LLL {
 //			valueEnc := enc.EbcdicEncode(fmt.Sprintf("%03d", value))
 //
 //			return valueEnc, nil
@@ -97,7 +96,7 @@ type Prefix struct {
 //			return valueEnc, nil
 //		}
 //	default:
-//		if prefix.Type == LLL || prefix.Type == LLLL {
+//		if suffix.Type == LLL || suffix.Type == LLLL {
 //			return utils.Hex2Byte(fmt.Sprintf("%04d", value)), nil
 //		} else {
 //			return utils.Hex2Byte(fmt.Sprintf("%02d", value)), nil
@@ -105,23 +104,23 @@ type Prefix struct {
 //	}
 //}
 //
-//func GetPrefixLen(prefixType Type, prefixEncoding enc.Encoding) int {
+//func GetSuffixLen(suffixType Type, suffixEncoding enc.Encoding) int {
 //	var length int
-//	switch prefixType {
+//	switch suffixType {
 //	case LL:
-//		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+//		if suffixEncoding == enc.Ascii || suffixEncoding == enc.Ebcdic {
 //			length = 2
 //		} else {
 //			length = 1
 //		}
 //	case LLL:
-//		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+//		if suffixEncoding == enc.Ascii || suffixEncoding == enc.Ebcdic {
 //			length = 3
 //		} else {
 //			length = 2
 //		}
 //	case LLLL:
-//		if prefixEncoding == enc.Ascii || prefixEncoding == enc.Ebcdic {
+//		if suffixEncoding == enc.Ascii || suffixEncoding == enc.Ebcdic {
 //			length = 4
 //		} else {
 //			length = 2

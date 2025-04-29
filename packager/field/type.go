@@ -1,4 +1,4 @@
-package prefix
+package field
 
 import (
 	"encoding/json"
@@ -8,23 +8,19 @@ import (
 type Type int
 
 const (
-	Fixed Type = iota
-	L
-	LL
-	LLL
-	LLLL
-	LLLLL
-	LLLLLL
+	None Type = iota
+	Numeric
+	String
+	Binary
+	Bitmap
 )
 
 var typeStrings = [...]string{
-	Fixed:  "FIXED",
-	L:      "L",
-	LL:     "LL",
-	LLL:    "LLL",
-	LLLL:   "LLLL",
-	LLLLL:  "LLLLL",
-	LLLLLL: "LLLLLL",
+	None:    "NONE",
+	Numeric: "NUMERIC",
+	String:  "STRING",
+	Binary:  "BINARY",
+	Bitmap:  "BITMAP",
 }
 
 // String return string
@@ -52,5 +48,5 @@ func (t *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid type prefix: %s", j)
+	return fmt.Errorf("invalid field type: %s", j)
 }

@@ -34,7 +34,10 @@ func TestPackEncoding(t *testing.T) {
 		data := "000001"
 		expectedResult := ValuesEncoding[e]
 
-		result := Pack(enc, data)
+		result, err := Pack(enc, data)
+		if err != nil {
+			t.Fatalf(`PackEncoding(%s) - Error %s`, data, err.Error())
+		}
 
 		if !bytes.Equal(result, expectedResult) {
 			t.Fatalf(`PackEncoding(%s) Encoding=%s - Result "%x" does not match "%x"`, data, enc.String(), result, expectedResult)
