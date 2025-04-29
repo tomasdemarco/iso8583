@@ -9,16 +9,22 @@ type Type int
 
 const (
 	Fixed Type = iota
+	L
 	LL
 	LLL
 	LLLL
+	LLLLL
+	LLLLLL
 )
 
 var typeStrings = [...]string{
-	Fixed: "FIXED",
-	LL:    "LL",
-	LLL:   "LLL",
-	LLLL:  "LLLL",
+	Fixed:  "FIXED",
+	L:      "L",
+	LL:     "LL",
+	LLL:    "LLL",
+	LLLL:   "LLLL",
+	LLLLL:  "LLLLL",
+	LLLLLL: "LLLLLL",
 }
 
 // String return string

@@ -6,18 +6,16 @@ import (
 	"io"
 )
 
-type PackFunc func(prefixValue prefix.Prefix, lenMessage int) ([]byte, error)
-type UnpackFunc func(r io.Reader, prefixValue prefix.Prefix) (int, error)
+type PackFunc func(prefixer prefix.Prefixer, lenMessage int) ([]byte, error)
+type UnpackFunc func(r io.Reader, prefixer prefix.Prefixer) (int, error)
 
-func Pack(prefixValue prefix.Prefix, lenMessage int) ([]byte, error) {
-	return prefix.Pack(prefixValue, lenMessage)
+func Pack(prefixer prefix.Prefixer, lenMessage int) ([]byte, error) {
+	return prefixer.EncodeLength(lenMessage)
 }
 
-func Unpack(r io.Reader, prefixValue prefix.Prefix) (int, error) {
+func Unpack(r io.Reader, prefixer prefix.Prefixer) (int, error) {
 
-	prefixLength := prefix.GetPrefixLen(prefixValue.Type, prefixValue.Encoding)
-
-	buf := make([]byte, prefixLength)
+	buf := make([]byte, prefixer.GetPackedLength())
 	_, err := r.Read(buf)
 	if err != nil {
 		if err != io.EOF {
@@ -27,7 +25,7 @@ func Unpack(r io.Reader, prefixValue prefix.Prefix) (int, error) {
 		return 0, err
 	}
 
-	result, _, err := prefix.Unpack(prefixValue, buf)
+	result, err := prefixer.DecodeLength(buf, 0)
 	if err != nil {
 		return 0, err
 	}

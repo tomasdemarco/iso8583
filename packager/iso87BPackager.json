@@ -1,8 +1,8 @@
 {
 	"description": "iso87BPackager",
 	"prefix": {
-		"type": "LL",
-		"encoding": "HEX"
+		"type": "LLLL",
+		"encoding": "BINARY"
 	},
 	"headerLength": 10,
 	"header": null,

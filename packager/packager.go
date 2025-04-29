@@ -12,7 +12,7 @@ import (
 
 type Packager struct {
 	Description string                 `json:"description"`
-	Prefix      prefix.Prefix          `json:"prefix"`
+	Prefix      prefix.Prefixer        `json:"prefix"`
 	Suffix      suffix.Suffix          `json:"suffix"`
 	Fields      map[string]field.Field `json:"fields"`
 }

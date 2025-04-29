@@ -11,11 +11,9 @@ import (
 func Unpack(pkgField pkgField.Field, messageRaw []byte, position int) (*int, []string, error) {
 
 	length := pkgField.Length
-	if pkgField.Encoding == encoding.Binary {
-		length = length / 2
-	}
+	pkgField.Encoding.SetLength(length)
 
-	value, err := encoding.Unpack(pkgField.Encoding, messageRaw[position:position+length])
+	value, err := pkgField.Encoding.Decode(messageRaw[position:])
 	if err != nil {
 		return nil, nil, err
 	}
@@ -27,11 +25,8 @@ func Unpack(pkgField pkgField.Field, messageRaw []byte, position int) (*int, []s
 
 	if sliceBitmap[0] == "001" {
 		secLength := pkgField.Length
-		if pkgField.Encoding == encoding.Binary {
-			secLength -= pkgField.Length / 2
-		}
 
-		value, err = encoding.Unpack(pkgField.Encoding, messageRaw[position+length:position+length+secLength])
+		value, err = pkgField.Encoding.Decode(messageRaw[position+length:])
 		if err != nil {
 			return nil, nil, err
 		}
