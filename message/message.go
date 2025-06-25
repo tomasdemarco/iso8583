@@ -13,6 +13,7 @@ type Message struct {
 	Packager *packager.Packager
 	Length   int
 	Header   interface{}
+	Footer   interface{}
 	Bitmap   []string
 	Fields   map[string]string
 	TagsEmv  map[string]string
