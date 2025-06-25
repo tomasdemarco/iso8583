@@ -12,6 +12,7 @@ import (
 type Message struct {
 	Packager *packager.Packager
 	Length   int
+	Header   interface{}
 	Bitmap   []string
 	Fields   map[string]string
 	TagsEmv  map[string]string
