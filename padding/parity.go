@@ -2,13 +2,10 @@ package padding
 
 import (
 	"github.com/tomasdemarco/iso8583/encoding"
-	"github.com/tomasdemarco/iso8583/utils"
 )
 
 type ParityPadder struct {
-	left    bool
-	char    utils.ByteFromString
-	encoder encoding.Encoder
+	left bool
 }
 
 var PARITY = Padders{
@@ -16,15 +13,15 @@ var PARITY = Padders{
 	RIGHT: &ParityPadder{left: false},
 }
 
-func (p *ParityPadder) EncodePad(lengthPackager int, lengthValue int) (string, string) {
+func (p *ParityPadder) EncodePad(char string, lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
 	if lengthValue%2 != 0 {
 		if p.left {
-			return string(p.char), ""
+			return string(char), "", nil
 
 		}
-		return "", string(p.char)
+		return "", string(char), nil
 	}
-	return "", ""
+	return "", "", nil
 }
 
 func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
@@ -36,12 +33,4 @@ func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
 		return 1, 0
 	}
 	return 0, 1
-}
-
-func (p *ParityPadder) SetChar(char utils.ByteFromString) {
-	p.char = char
-}
-
-func (p *ParityPadder) SetEncoder(encoder encoding.Encoder) {
-	p.encoder = encoder
 }

@@ -67,46 +67,50 @@ func LoadFromJsonV2(path, file string) (*Packager, error) {
 	fields := make(map[string]field.Field)
 
 	for k, v := range pkgDto.Fields {
-		enc, err := GetEncoder(v.Encoding)
+		fld, err := SetField(v)
 		if err != nil {
 			return nil, err
 		}
-
-		pf, err := GetPrefixer(v.Prefix)
-		if err != nil {
-			return nil, err
-		}
-
-		if v.Prefix.Hex {
-			pf.SetHex()
-		}
-
-		length := v.Length
-		if v.Encoding == encoding.Binary || v.Encoding == encoding.Bcd {
-			length = length / 2
-		}
-
-		pad, err := GetPadder(v.Padding)
-		if err != nil {
-			return nil, err
-		}
-
-		pad.SetChar(v.Padding.Char)
-
-		fields[k] = field.Field{
-			Description: v.Description,
-			Type:        v.Type,
-			Length:      length,
-			Pattern:     v.Pattern,
-			Encoding:    enc,
-			Prefix:      pf,
-			Padding:     pad,
-		}
+		fields[k] = *fld
 	}
 
 	pkg.Fields = fields
 
 	return &pkg, err
+}
+
+func SetField(f FieldDto) (*field.Field, error) {
+	length := f.Length
+	if f.Encoding == encoding.Binary || f.Encoding == encoding.Bcd {
+		length = length / 2
+	}
+
+	enc, err := GetEncoder(f.Encoding)
+	if err != nil {
+		return nil, err
+	}
+
+	pf, err := GetPrefixer(f.Prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	pad, err := GetPadder(f.Padding)
+	if err != nil {
+		return nil, err
+	}
+
+	return &field.Field{
+		Description: f.Description,
+		Type:        f.Type,
+		Length:      length,
+		Pattern:     f.Pattern,
+		Encoding:    enc,
+		Prefix:      pf,
+		PrefixHex:   f.Prefix.Hex,
+		Padding:     pad,
+		PadChar:     f.Padding.Char,
+	}, nil
 }
 
 func GetPrefixer(pf prefix.Prefix) (prefix.Prefixer, error) {
@@ -216,4 +220,5 @@ func GetPadder(p padding.Padding) (padding.Padder, error) {
 	default:
 		return padding.NONE.NONE, nil
 	}
+
 }

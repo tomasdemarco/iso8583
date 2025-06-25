@@ -15,7 +15,9 @@ type Field struct {
 	Pattern     string           `json:"pattern"`
 	Encoding    encoding.Encoder `json:"encoding"`
 	Prefix      prefix.Prefixer  `json:"prefix"`
+	PrefixHex   bool             `json:"prefixHex"`
 	Padding     padding.Padder   `json:"padding"`
+	PadChar     string           `json:"padChar"`
 	//SubfieldsData subfield.SubfieldsData `json:"subFieldsData"`
 }
 
@@ -40,8 +42,6 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 			length = length / 2
 		}
 	}
-
-	f.Padding.SetEncoder(f.Encoding)
 
 	paddingLeft, paddingRight := f.Padding.DecodePad(length)
 
@@ -72,15 +72,18 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 	return value, length + f.Prefix.GetPackedLength(), nil
 }
 
-func (f Field) Pack(value string) ([]byte, error) {
-
-	f.Padding.SetEncoder(f.Encoding)
-	padLeft, padRight := f.Padding.EncodePad(f.Length, len(value))
-	fieldEncode, err := f.Encoding.Encode(padLeft + value + padRight)
+func (f Field) Pack(value string) ([]byte, string, error) {
+	padLeft, padRight, err := f.Padding.EncodePad(f.PadChar, f.Length, len(value), f.Encoding)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
+	paddedField := padLeft + value + padRight
+
+	fieldEncode, err := f.Encoding.Encode(paddedField)
+	if err != nil {
+		return nil, "", err
+	}
 	length := len(fieldEncode)
 
 	if _, ok := f.Encoding.(*encoding.BCD); ok {
@@ -89,8 +92,8 @@ func (f Field) Pack(value string) ([]byte, error) {
 
 	fieldPrefix, err := f.Prefix.EncodeLength(length)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return append(fieldPrefix, fieldEncode...), nil
+	return append(fieldPrefix, fieldEncode...), paddedField, nil
 }

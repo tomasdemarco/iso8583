@@ -3,14 +3,11 @@ package padding
 import (
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
-	"github.com/tomasdemarco/iso8583/utils"
 	"strings"
 )
 
 type FillPadder struct {
-	left    bool
-	char    utils.ByteFromString
-	encoder encoding.Encoder
+	left bool
 }
 
 var FILL = Padders{
@@ -18,26 +15,19 @@ var FILL = Padders{
 	RIGHT: &FillPadder{left: false},
 }
 
-func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int) (string, string) {
-	fmt.Println(lengthPackager, lengthValue)
-	if _, ok := p.encoder.(*encoding.BCD); ok {
+func (p *FillPadder) EncodePad(char string, lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
+	if _, ok := encoder.(*encoding.BCD); ok {
 		lengthPackager = lengthPackager * 2
 	}
-	fmt.Println(lengthPackager, lengthValue)
-	if p.left {
-		return strings.Repeat(string(p.char), lengthPackager-lengthValue), ""
+	if lengthPackager < lengthValue {
+		return "", "", fmt.Errorf("value %d too long, maximum %d", lengthValue, lengthPackager)
 	}
-	return "", strings.Repeat(string(p.char), lengthPackager-lengthValue)
+	if p.left {
+		return strings.Repeat(char, lengthPackager-lengthValue), "", nil
+	}
+	return "", strings.Repeat(char, lengthPackager-lengthValue), nil
 }
 
 func (p *FillPadder) DecodePad(lengthField int) (int, int) {
 	return 0, 0
-}
-
-func (p *FillPadder) SetChar(char utils.ByteFromString) {
-	p.char = char
-}
-
-func (p *FillPadder) SetEncoder(encoder encoding.Encoder) {
-	p.encoder = encoder
 }
