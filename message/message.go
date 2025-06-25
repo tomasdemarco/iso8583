@@ -98,7 +98,6 @@ func (m *Message) Pack() ([]byte, error) {
 	m.Bitmap = append(bitmapSlice[:1], append([]string{"001"}, bitmapSlice[1:]...)...)
 
 	msgPacked := new(bytes.Buffer)
-
 	for _, k := range m.Bitmap {
 		var value string
 
@@ -113,12 +112,13 @@ func (m *Message) Pack() ([]byte, error) {
 		//}
 		value = m.Fields[k]
 
-		fieldEncode, errPack := m.Packager.Fields[k].Pack(value)
+		encodeField, plainField, errPack := m.Packager.Fields[k].Pack(value)
 		if errPack != nil {
 			return nil, errors.New(fmt.Sprintf("pack field %s: %v", k, errPack))
 		}
+		m.SetField(k, plainField)
 
-		msgPacked.Write(fieldEncode)
+		msgPacked.Write(encodeField)
 	}
 
 	return msgPacked.Bytes(), err
