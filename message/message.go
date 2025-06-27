@@ -13,7 +13,7 @@ type Message struct {
 	Packager *packager.Packager
 	Length   int
 	Header   interface{}
-	Footer   interface{}
+	Trailer  interface{}
 	Bitmap   []string
 	Fields   map[string]string
 	TagsEmv  map[string]string
@@ -75,6 +75,7 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 
 	for _, fieldId := range m.Bitmap {
 		if fieldId != "001" {
+			fmt.Println(m.Fields)
 			value, length, err = m.Packager.Fields[fieldId].Unpack(messageRaw, position)
 			if err != nil {
 				return errors.New(fmt.Sprintf("unpack field %s: %v", fieldId, err))

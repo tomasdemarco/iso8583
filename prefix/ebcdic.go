@@ -43,11 +43,9 @@ func (p *EbcdicPrefixer) EncodeLength(length int) ([]byte, error) {
 
 // DecodeLength decodes the length from the byte slice using EBCDIC.
 func (p *EbcdicPrefixer) DecodeLength(b []byte, offset int) (int, error) {
-	if p.nDigits == 0 {
-		return 0, nil
-	}
+	p.encoder.SetLength(p.nDigits)
 
-	lengthString, err := p.encoder.Decode(b[offset : offset+p.nDigits])
+	lengthString, err := p.encoder.Decode(b[offset:])
 	if err != nil {
 		return 0, err
 	}
