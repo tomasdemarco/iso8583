@@ -52,12 +52,19 @@ func (p *BinaryPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 		return 0, err
 	}
 
-	length, err := strconv.Atoi(lengthString)
-	if err != nil {
-		return 0, err
+	if p.hex {
+		length, err := strconv.ParseInt(lengthString, 16, 10)
+		if err != nil {
+			return 0, err
+		}
+		return int(length), nil
+	} else {
+		length, err := strconv.Atoi(lengthString)
+		if err != nil {
+			return 0, err
+		}
+		return length, nil
 	}
-
-	return length, nil
 }
 
 // GetPackedLength returns the number of bytes used to encode the length.

@@ -42,7 +42,9 @@ func (p *AsciiPrefixer) EncodeLength(length int) ([]byte, error) {
 
 // DecodeLength decodes the length from the byte slice.
 func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
-	lengthString, err := p.encoder.Decode(b[offset : offset+p.nDigits])
+	p.encoder.SetLength(p.nDigits)
+
+	lengthString, err := p.encoder.Decode(b[offset:offset])
 	if err != nil {
 		return 0, err
 	}
