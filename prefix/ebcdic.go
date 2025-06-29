@@ -3,7 +3,6 @@ package prefix
 import (
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
-	"strconv"
 )
 
 // EbcdicPrefixer implements the Prefixer interface for EBCDIC length encoding.
@@ -29,13 +28,9 @@ func NewEbcdicPrefixer(nDigits int) EbcdicPrefixer {
 
 // EncodeLength encodes the length into the byte slice using EBCDIC.
 func (p *EbcdicPrefixer) EncodeLength(length int) ([]byte, error) {
-	if p.hex {
-		length64, err := strconv.ParseInt(fmt.Sprintf("%d", length), 10, 16)
-		if err != nil {
-			return nil, err
-		}
-
-		length = int(length64)
+	length, err := lengthInt(length, p.hex)
+	if err != nil {
+		return nil, err
 	}
 
 	return p.encoder.Encode(fmt.Sprintf("%0*d", p.nDigits, length))
@@ -50,12 +45,7 @@ func (p *EbcdicPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 		return 0, err
 	}
 
-	length, err := strconv.Atoi(lengthString)
-	if err != nil {
-		return 0, err
-	}
-
-	return length, nil
+	return lengthStringToInt(lengthString, p.hex)
 }
 
 // GetPackedLength returns the number of digits used to encode the length.

@@ -7,7 +7,6 @@ import (
 	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/padding"
 	"github.com/tomasdemarco/iso8583/prefix"
-	"github.com/tomasdemarco/iso8583/suffix"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,7 +15,6 @@ import (
 type PackagerDto struct {
 	Description string              `json:"description"`
 	Prefix      prefix.Prefix       `json:"prefix"`
-	Suffix      suffix.Suffix       `json:"suffix"`
 	Fields      map[string]FieldDto `json:"fields"`
 }
 
@@ -28,7 +26,6 @@ type FieldDto struct {
 	Encoding    encoding.Encoding `json:"encoding"`
 	Prefix      prefix.Prefix     `json:"prefix"`
 	Padding     padding.Padding   `json:"padding"`
-	//SubfieldsData subfield.SubfieldsData `json:"subFieldsData"`
 }
 
 func LoadFromJsonV2(path, file string) (*Packager, error) {

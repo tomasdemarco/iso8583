@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/prefix"
-	"github.com/tomasdemarco/iso8583/suffix"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 type Packager struct {
 	Description string                 `json:"description"`
 	Prefix      prefix.Prefixer        `json:"prefix"`
-	Suffix      suffix.Suffix          `json:"suffix"`
 	Fields      map[string]field.Field `json:"fields"`
 }
 

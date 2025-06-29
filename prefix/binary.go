@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/utils"
-	"strconv"
 )
 
 // BinaryPrefixer implements the Prefixer interface for BINARY length encoding.
@@ -26,13 +25,9 @@ func NewBinaryPrefixer(nBytes int) BinaryPrefixer {
 
 // EncodeLength encodes the length into the byte slice.
 func (p *BinaryPrefixer) EncodeLength(length int) ([]byte, error) {
-	if p.hex {
-		length64, err := strconv.ParseInt(fmt.Sprintf("%d", length), 10, 16)
-		if err != nil {
-			return nil, err
-		}
-
-		length = int(length64)
+	length, err := lengthInt(length, p.hex)
+	if err != nil {
+		return nil, err
 	}
 
 	b, err := p.encoder.Encode(fmt.Sprintf("%d", length))
@@ -52,19 +47,7 @@ func (p *BinaryPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 		return 0, err
 	}
 
-	if p.hex {
-		length, err := strconv.ParseInt(lengthString, 16, 10)
-		if err != nil {
-			return 0, err
-		}
-		return int(length), nil
-	} else {
-		length, err := strconv.Atoi(lengthString)
-		if err != nil {
-			return 0, err
-		}
-		return length, nil
-	}
+	return lengthStringToInt(lengthString, p.hex)
 }
 
 // GetPackedLength returns the number of bytes used to encode the length.
