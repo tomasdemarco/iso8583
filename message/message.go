@@ -63,8 +63,13 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 
 	m.Bitmap = sliceBitmap
 
-	m.SetField("001", fmt.Sprintf("%x", messageRaw[position:position+*lengthBitmap]))
+	m.Packager.Fields["001"].Encoding.SetLength(*lengthBitmap)
+	value, err = m.Packager.Fields["001"].Encoding.Decode(messageRaw[position:])
+	if err != nil {
+		return errors.New(fmt.Sprintf("unpack field 001: %v", err))
+	}
 
+	m.SetField("001", value)
 	position += *lengthBitmap
 
 	match, _ = regexp.MatchString(m.Packager.Fields["001"].Pattern, m.Fields["001"])
