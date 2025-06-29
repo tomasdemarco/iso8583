@@ -3,7 +3,6 @@ package prefix
 import (
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
-	"strconv"
 )
 
 // BcdPrefixer implements the Prefixer interface for BCD length encoding.
@@ -29,13 +28,9 @@ func NewBcdPrefixer(nDigits int) *BcdPrefixer {
 
 // EncodeLength encodes the length into the byte slice.
 func (p *BcdPrefixer) EncodeLength(length int) ([]byte, error) {
-	if p.hex {
-		length64, err := strconv.ParseInt(fmt.Sprintf("%x", length), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-
-		length = int(length64)
+	length, err := lengthInt(length, p.hex)
+	if err != nil {
+		return nil, err
 	}
 
 	return p.encoder.Encode(fmt.Sprintf("%0*d", p.nDigits, length))
@@ -50,19 +45,7 @@ func (p *BcdPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 		return 0, err
 	}
 
-	if p.hex {
-		length, err := strconv.ParseInt(lengthString, 16, 10)
-		if err != nil {
-			return 0, err
-		}
-		return int(length), nil
-	} else {
-		length, err := strconv.Atoi(lengthString)
-		if err != nil {
-			return 0, err
-		}
-		return length, nil
-	}
+	return lengthStringToInt(lengthString, p.hex)
 }
 
 // GetPackedLength returns the number of digits used to encode the length.

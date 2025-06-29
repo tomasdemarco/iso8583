@@ -3,7 +3,6 @@ package prefix
 import (
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
-	"strconv"
 )
 
 // AsciiPrefixer implements the Prefixer interface for ASCII length encoding.
@@ -29,14 +28,11 @@ func NewAsciiPrefixer(nDigits int) AsciiPrefixer {
 
 // EncodeLength encodes the length into the byte slice.
 func (p *AsciiPrefixer) EncodeLength(length int) ([]byte, error) {
-	if p.hex {
-		length64, err := strconv.ParseInt(fmt.Sprintf("%d", length), 10, 16)
-		if err != nil {
-			return nil, err
-		}
-
-		length = int(length64)
+	length, err := lengthInt(length, p.hex)
+	if err != nil {
+		return nil, err
 	}
+
 	return p.encoder.Encode(fmt.Sprintf("%0*d", p.nDigits, length))
 }
 
@@ -44,17 +40,12 @@ func (p *AsciiPrefixer) EncodeLength(length int) ([]byte, error) {
 func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 	p.encoder.SetLength(p.nDigits)
 
-	lengthString, err := p.encoder.Decode(b[offset:offset])
+	lengthString, err := p.encoder.Decode(b[offset:])
 	if err != nil {
 		return 0, err
 	}
 
-	length, err := strconv.Atoi(lengthString)
-	if err != nil {
-		return 0, err
-	}
-
-	return length, nil
+	return lengthStringToInt(lengthString, p.hex)
 }
 
 // GetPackedLength returns the number of digits used to encode the length.
