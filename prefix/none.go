@@ -6,9 +6,10 @@ import (
 
 // NonePrefixer implements the Prefixer interface for NONE length encoding.
 type NonePrefixer struct {
-	nDigits int
-	encoder encoding.Encoder
-	hex     bool
+	nDigits     int
+	encoder     encoding.Encoder
+	hex         bool
+	isInclusive bool
 }
 
 var NONE = Prefixers{
@@ -21,12 +22,12 @@ func NewNonePrefixer(nDigits int) NonePrefixer {
 }
 
 // EncodeLength encodes the length into the byte slice.
-func (p *NonePrefixer) EncodeLength(length int) ([]byte, error) {
+func (p *NonePrefixer) EncodeLength(_ int) ([]byte, error) {
 	return nil, nil
 }
 
 // DecodeLength decodes the length from the byte slice.
-func (p *NonePrefixer) DecodeLength(b []byte, offset int) (int, error) {
+func (p *NonePrefixer) DecodeLength(_ []byte, _ int) (int, error) {
 	return 0, nil
 }
 
@@ -35,6 +36,10 @@ func (p *NonePrefixer) GetPackedLength() int {
 	return p.nDigits
 }
 
-func (p *NonePrefixer) SetHex() {
-	p.hex = true
+func (p *NonePrefixer) SetHex(hex bool) {
+	p.hex = hex
+}
+
+func (p *NonePrefixer) SetIsInclusive(isInclusive bool) {
+	p.isInclusive = isInclusive
 }

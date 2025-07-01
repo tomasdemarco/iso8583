@@ -8,6 +8,7 @@ import (
 
 type FillPadder struct {
 	left bool
+	char string
 }
 
 var FILL = Padders{
@@ -15,7 +16,11 @@ var FILL = Padders{
 	RIGHT: &FillPadder{left: false},
 }
 
-func (p *FillPadder) EncodePad(char string, lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
+func NewFillPadder(left bool, char string) Padder {
+	return &FillPadder{left, char}
+}
+
+func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
 	if _, ok := encoder.(*encoding.BCD); ok {
 		lengthPackager = lengthPackager * 2
 	}
@@ -23,11 +28,19 @@ func (p *FillPadder) EncodePad(char string, lengthPackager int, lengthValue int,
 		return "", "", fmt.Errorf("value %d too long, maximum %d", lengthValue, lengthPackager)
 	}
 	if p.left {
-		return strings.Repeat(char, lengthPackager-lengthValue), "", nil
+		return strings.Repeat(p.char, lengthPackager-lengthValue), "", nil
 	}
-	return "", strings.Repeat(char, lengthPackager-lengthValue), nil
+	return "", strings.Repeat(p.char, lengthPackager-lengthValue), nil
 }
 
-func (p *FillPadder) DecodePad(lengthField int) (int, int) {
+func (p *FillPadder) DecodePad(_ int) (int, int) {
 	return 0, 0
+}
+
+func (p *FillPadder) SetChar(char string) {
+	p.char = char
+}
+
+func (p *FillPadder) GetChar() string {
+	return p.char
 }

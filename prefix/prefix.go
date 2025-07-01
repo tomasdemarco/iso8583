@@ -5,7 +5,8 @@ import (
 )
 
 type Prefix struct {
-	Type     Type         `json:"type"`
-	Encoding enc.Encoding `json:"encoding"`
-	Hex      bool         `json:"hex"`
+	Type        Type         `json:"type"`
+	Encoding    enc.Encoding `json:"encoding"`
+	Hex         bool         `json:"hex"`
+	IsInclusive bool         `json:"isInclusive"`
 }

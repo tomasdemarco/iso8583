@@ -4,7 +4,8 @@ type Prefixer interface {
 	EncodeLength(length int) ([]byte, error)
 	DecodeLength(b []byte, offset int) (int, error)
 	GetPackedLength() int
-	SetHex()
+	SetIsInclusive(bool)
+	SetHex(bool)
 }
 
 type Prefixers struct {
