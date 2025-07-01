@@ -15,10 +15,7 @@ type Field struct {
 	Pattern     string           `json:"pattern"`
 	Encoding    encoding.Encoder `json:"encoding"`
 	Prefix      prefix.Prefixer  `json:"prefix"`
-	PrefixHex   bool             `json:"prefixHex"`
 	Padding     padding.Padder   `json:"padding"`
-	PadChar     string           `json:"padChar"`
-	//SubfieldsData subfield.SubfieldsData `json:"subFieldsData"`
 }
 
 func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
@@ -65,15 +62,11 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 		return "", 0, err
 	}
 
-	//if fieldPackager.SubFields != nil { //TODO ver como resolver subfields
-	//	m.UnpackSubfields(field, value)
-	//}
-
 	return value, length + f.Prefix.GetPackedLength(), nil
 }
 
 func (f Field) Pack(value string) ([]byte, string, error) {
-	padLeft, padRight, err := f.Padding.EncodePad(f.PadChar, f.Length, len(value), f.Encoding)
+	padLeft, padRight, err := f.Padding.EncodePad(f.Length, len(value), f.Encoding)
 	if err != nil {
 		return nil, "", err
 	}

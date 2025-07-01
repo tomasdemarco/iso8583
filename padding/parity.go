@@ -6,6 +6,7 @@ import (
 
 type ParityPadder struct {
 	left bool
+	char string
 }
 
 var PARITY = Padders{
@@ -13,13 +14,17 @@ var PARITY = Padders{
 	RIGHT: &ParityPadder{left: false},
 }
 
-func (p *ParityPadder) EncodePad(char string, lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
+func NewParityPadder(left bool, char string) Padder {
+	return &ParityPadder{left, char}
+}
+
+func (p *ParityPadder) EncodePad(_, lengthValue int, _ encoding.Encoder) (string, string, error) {
 	if lengthValue%2 != 0 {
 		if p.left {
-			return string(char), "", nil
+			return p.char, "", nil
 
 		}
-		return "", string(char), nil
+		return "", p.char, nil
 	}
 	return "", "", nil
 }
@@ -33,4 +38,12 @@ func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
 		return 1, 0
 	}
 	return 0, 1
+}
+
+func (p *ParityPadder) SetChar(char string) {
+	p.char = char
+}
+
+func (p *ParityPadder) GetChar() string {
+	return p.char
 }

@@ -59,6 +59,8 @@ func LoadFromJsonV2(path, file string) (*Packager, error) {
 		return nil, err
 	}
 
+	pf.SetHex(pkgDto.Prefix.Hex)
+	pf.SetIsInclusive(pkgDto.Prefix.IsInclusive)
 	pkg.Prefix = pf
 
 	fields := make(map[string]field.Field)
@@ -92,10 +94,15 @@ func SetField(f FieldDto) (*field.Field, error) {
 		return nil, err
 	}
 
+	pf.SetHex(f.Prefix.Hex)
+	pf.SetIsInclusive(f.Prefix.IsInclusive)
+
 	pad, err := GetPadder(f.Padding)
 	if err != nil {
 		return nil, err
 	}
+
+	pad.SetChar(f.Padding.Char)
 
 	return &field.Field{
 		Description: f.Description,
@@ -104,74 +111,20 @@ func SetField(f FieldDto) (*field.Field, error) {
 		Pattern:     f.Pattern,
 		Encoding:    enc,
 		Prefix:      pf,
-		PrefixHex:   f.Prefix.Hex,
 		Padding:     pad,
-		PadChar:     f.Padding.Char,
 	}, nil
 }
 
 func GetPrefixer(pf prefix.Prefix) (prefix.Prefixer, error) {
 	switch pf.Encoding {
 	case encoding.Bcd:
-		switch pf.Type {
-		case prefix.L:
-			return prefix.BCD.L, nil
-		case prefix.LL:
-			return prefix.BCD.LL, nil
-		case prefix.LLL:
-			return prefix.BCD.LLL, nil
-		case prefix.LLLL:
-			return prefix.BCD.LLLL, nil
-		case prefix.LLLLL:
-			return prefix.BCD.LLLLL, nil
-		case prefix.LLLLLL:
-			return prefix.BCD.LLLLLL, nil
-		default:
-			return nil, errors.New("invalid prefix")
-		}
+		return prefix.NewBcdPrefixer(pf.Type.EnumIndex(), pf.Hex, pf.IsInclusive), nil
 	case encoding.Ebcdic:
-		switch pf.Type {
-		case prefix.L:
-			return prefix.EBCDIC.L, nil
-		case prefix.LL:
-			return prefix.EBCDIC.LL, nil
-		case prefix.LLL:
-			return prefix.EBCDIC.LLL, nil
-		case prefix.LLLL:
-			return prefix.EBCDIC.LLLL, nil
-		case prefix.LLLLL:
-			return prefix.EBCDIC.LLLLL, nil
-		case prefix.LLLLLL:
-			return prefix.EBCDIC.LLLLLL, nil
-		default:
-			return nil, errors.New("invalid prefix")
-		}
+		return prefix.NewEbcdicPrefixer(pf.Type.EnumIndex(), pf.Hex, pf.IsInclusive), nil
 	case encoding.Binary:
-		switch pf.Type {
-		case prefix.LL:
-			return prefix.BINARY.B, nil
-		case prefix.LLLL:
-			return prefix.BINARY.BB, nil
-		default:
-			return nil, errors.New("invalid prefix")
-		}
+		return prefix.NewBinaryPrefixer(pf.Type.EnumIndex(), pf.Hex, pf.IsInclusive), nil
 	case encoding.Ascii:
-		switch pf.Type {
-		case prefix.L:
-			return prefix.ASCII.L, nil
-		case prefix.LL:
-			return prefix.ASCII.LL, nil
-		case prefix.LLL:
-			return prefix.ASCII.LLL, nil
-		case prefix.LLLL:
-			return prefix.ASCII.LLLL, nil
-		case prefix.LLLLL:
-			return prefix.ASCII.LLLLL, nil
-		case prefix.LLLLLL:
-			return prefix.ASCII.LLLLLL, nil
-		default:
-			return nil, errors.New("invalid prefix")
-		}
+		return prefix.NewAsciiPrefixer(pf.Type.EnumIndex(), pf.Hex, pf.IsInclusive), nil
 	default:
 		return prefix.NONE.Fixed, nil
 	}
@@ -199,18 +152,18 @@ func GetPadder(p padding.Padding) (padding.Padder, error) {
 	case padding.Parity:
 		switch p.Position {
 		case padding.Left:
-			return padding.PARITY.LEFT, nil
+			return padding.NewParityPadder(true, p.Char), nil
 		case padding.Right:
-			return padding.PARITY.RIGHT, nil
+			return padding.NewParityPadder(false, p.Char), nil
 		default:
 			return nil, errors.New("invalid padding")
 		}
 	case padding.Fill:
 		switch p.Position {
 		case padding.Left:
-			return padding.FILL.LEFT, nil
+			return padding.NewFillPadder(true, p.Char), nil
 		case padding.Right:
-			return padding.FILL.RIGHT, nil
+			return padding.NewFillPadder(false, p.Char), nil
 		default:
 			return nil, errors.New("invalid padding")
 		}
