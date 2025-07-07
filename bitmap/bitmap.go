@@ -8,19 +8,19 @@ import (
 	"sort"
 )
 
-func Unpack(pkgField pkgField.Field, messageRaw []byte, position int) (*int, []string, error) {
+func Unpack(pkgField pkgField.Field, messageRaw []byte, position int) (int, []string, error) {
 
 	length := pkgField.Length
 	pkgField.Encoding.SetLength(length)
 
 	value, err := pkgField.Encoding.Decode(messageRaw[position:])
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 
 	sliceBitmap, err := encoding.BitmapDecode(utils.Hex2Byte(value), 1)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 
 	if sliceBitmap[0] == "001" {
@@ -28,20 +28,20 @@ func Unpack(pkgField pkgField.Field, messageRaw []byte, position int) (*int, []s
 
 		value, err = pkgField.Encoding.Decode(messageRaw[position+length:])
 		if err != nil {
-			return nil, nil, err
+			return 0, nil, err
 		}
 
 		length += secLength
 
 		sliceExtBitmap, err := encoding.BitmapDecode(utils.Hex2Byte(value), 65)
 		if err != nil {
-			return nil, nil, err
+			return 0, nil, err
 		}
 
 		sliceBitmap = append(sliceBitmap, sliceExtBitmap...)
 	}
 
-	return &length, sliceBitmap, nil
+	return length, sliceBitmap, nil
 }
 
 func Pack(fields map[string]string) ([]string, []byte, error) {
