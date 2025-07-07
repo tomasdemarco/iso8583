@@ -3,6 +3,7 @@ package packager
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/padding"
@@ -10,6 +11,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 type PackagerDto struct {
@@ -104,11 +106,16 @@ func SetField(f FieldDto) (*field.Field, error) {
 
 	pad.SetChar(f.Padding.Char)
 
+	re, err := regexp.Compile(f.Pattern)
+	if err != nil {
+		return nil, fmt.Errorf("invalid pattern for field %w", err)
+	}
+
 	return &field.Field{
 		Description: f.Description,
 		Type:        f.Type,
 		Length:      length,
-		Pattern:     f.Pattern,
+		Pattern:     re,
 		Encoding:    enc,
 		Prefix:      pf,
 		Padding:     pad,

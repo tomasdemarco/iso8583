@@ -12,7 +12,7 @@ type Field struct {
 	Description string           `json:"description"`
 	Type        Type             `json:"type"`
 	Length      int              `json:"length"`
-	Pattern     string           `json:"pattern"`
+	Pattern     *regexp.Regexp   `json:"pattern"`
 	Encoding    encoding.Encoder `json:"encoding"`
 	Prefix      prefix.Prefixer  `json:"prefix"`
 	Padding     padding.Padder   `json:"padding"`
@@ -56,10 +56,9 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 	}
 
 	value = value[paddingLeft : len(value)-paddingRight]
-	match, _ := regexp.MatchString(f.Pattern, value)
-	if !match {
-		err = errors.New("invalid format")
-		return "", 0, err
+
+	if !f.Pattern.MatchString(value) {
+		return "", 0, errors.New("invalid format")
 	}
 
 	return value, length + f.Prefix.GetPackedLength(), nil
