@@ -1,6 +1,10 @@
+// Package encoding provides various data encoding and decoding functionalities for ISO 8583 fields.
 package encoding
 
+import "fmt"
+
 var (
+	// asciiToEbcdic is a lookup table for converting ASCII characters to EBCDIC.
 	asciiToEbcdic = []byte{
 		'\x00', '\x01', '\x02', '\x03', '\x37', '\x2D', '\x2E', '\x2F',
 		'\x16', '\x05', '\x25', '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
@@ -35,6 +39,7 @@ var (
 		'\xDC', '\xDD', '\xDE', '\xDF', '\xEA', '\xEB', '\xEC', '\xED',
 		'\xEE', '\xEF', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'}
 
+	// ebcdicToAscii is a lookup table for converting EBCDIC characters to ASCII.
 	ebcdicToAscii = []byte{
 		'\x00', '\x01', '\x02', '\x03', '\x9C', '\x09', '\x86', '\x7F',
 		'\x97', '\x8D', '\x8E', '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
@@ -71,14 +76,18 @@ var (
 )
 
 // EBCDIC implements the Encoder interface for EBCDIC encoding.
+// It converts ASCII strings to EBCDIC byte slices and vice-versa using lookup tables.
 type EBCDIC struct {
 	length int
 }
 
-func NewEbcdicEncoder() EBCDIC {
-	return EBCDIC{}
+// NewEbcdicEncoder creates a new EBCDIC encoder.
+func NewEbcdicEncoder() Encoder {
+	return &EBCDIC{}
 }
 
+// Encode converts an ASCII string to an EBCDIC byte slice.
+// It uses the asciiToEbcdic lookup table.
 func (e *EBCDIC) Encode(src string) ([]byte, error) {
 	var dst []byte
 	for _, v := range []byte(src) {
@@ -87,7 +96,13 @@ func (e *EBCDIC) Encode(src string) ([]byte, error) {
 	return dst, nil
 }
 
+// Decode converts an EBCDIC byte slice to an ASCII string.
+// It reads up to the configured length and uses the ebcdicToAscii lookup table.
 func (e *EBCDIC) Decode(src []byte) (string, error) {
+	if len(src) < e.length {
+		return "", fmt.Errorf("EBCDIC decode: not enough data to read. expected %d, got %d", e.length, len(src))
+	}
+
 	var dst []byte
 	for _, v := range src[:e.length] {
 		dst = append(dst, ebcdicToAscii[v])
@@ -96,6 +111,7 @@ func (e *EBCDIC) Decode(src []byte) (string, error) {
 	return string(dst), nil
 }
 
+// SetLength sets the length for the EBCDIC encoder.
 func (e *EBCDIC) SetLength(length int) {
 	e.length = length
 }

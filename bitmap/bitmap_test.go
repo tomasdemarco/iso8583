@@ -2,119 +2,111 @@ package bitmap
 
 import (
 	"bytes"
+	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/tomasdemarco/iso8583/encoding"
 	pkgField "github.com/tomasdemarco/iso8583/packager/field"
-	"testing"
 )
 
-// TestUnpackBitmap calls message.UnpackBitmap
-func TestUnpackBitmap(t *testing.T) {
-	expectedResult := []string{"001", "002", "004", "065", "126"}
-
-	// Encoding Binary
-	data := []byte{0xd0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04}
-
-	fieldsPackager := pkgField.Field{}
-	fieldsPackager.Length = 16
-	fieldsPackager.Encoding = encoding.Binary
-
-	_, result, err := Unpack(fieldsPackager, data, 0)
-	if err != nil {
-		t.Fatalf(`UnpackBitmap(%x) - Error %s`, data, err.Error())
+func TestBitmapRoundTrip(t *testing.T) {
+	testCases := []struct {
+		name                string
+		fields              map[string]string
+		field001Encoder     encoding.Encoder // Encoder para el campo 001 (bitmap)
+		expectedPackedBytes []byte
+		expectedBitmapSlice []string
+	}{
+		{
+			name: "Primary Bitmap - Fields 2, 3, 5 (BINARY)",
+			fields: map[string]string{
+				"002": "value2",
+				"003": "value3",
+				"005": "value5",
+			},
+			field001Encoder:     &encoding.BINARY{},
+			expectedPackedBytes: []byte{0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+			expectedBitmapSlice: []string{"002", "003", "005"},
+		},
+		{
+			name: "Primary + Secondary Bitmap - Fields 1, 65, 128 (BINARY)",
+			fields: map[string]string{
+				"001": "value1", // Campo 1 activa el bitmap secundario
+				"065": "value65",
+				"128": "value128",
+			},
+			field001Encoder:     &encoding.BINARY{},
+			expectedPackedBytes: []byte{0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01},
+			expectedBitmapSlice: []string{"001", "065", "128"},
+		},
+		{
+			name: "Primary Bitmap - Fields 2, 3 (ASCII Encoded)",
+			fields: map[string]string{
+				"002": "value2",
+				"003": "value3",
+			},
+			field001Encoder: &encoding.ASCII{},
+			// Bitmap binario para 2,3 es 01100000... (0x60). Hex string "6000000000000000"
+			// ASCII de "6000000000000000" es 0x36, 0x30, 0x30, ...
+			expectedPackedBytes: []byte{0x36, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30},
+			expectedBitmapSlice: []string{"002", "003"},
+		},
+		{
+			name: "Primary Bitmap - Fields 2, 3 (EBCDIC Encoded)",
+			fields: map[string]string{
+				"002": "value2",
+				"003": "value3",
+			},
+			field001Encoder: &encoding.EBCDIC{},
+			// Bitmap binario para 2,3 es 01100000... (0x60). Hex string "6000000000000000"
+			// EBCDIC de "6000000000000000" es 0xF6, 0xF0, 0xF0, ...
+			expectedPackedBytes: []byte{0xF6, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0},
+			expectedBitmapSlice: []string{"002", "003"},
+		},
 	}
 
-	if len(result) != len(expectedResult) {
-		t.Fatalf(`UnpackBitmap(%x) - Length is different - Result "%s" / Expected "%s"`, data, result, expectedResult)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// --- Test Pack ---
+			packedBitmapSlice, packedBitmapBytes, err := Pack(tc.fields)
+			if err != nil {
+				t.Fatalf("Pack() falló: %v", err)
+			}
+
+			// Verificar el slice de bitmap generado
+			if !reflect.DeepEqual(packedBitmapSlice, tc.expectedBitmapSlice) {
+				t.Errorf("Pack() slice de bitmap incorrecto.\nEsperado: %v\nRecibido:  %v", tc.expectedBitmapSlice, packedBitmapSlice)
+			}
+
+			// Verificar los bytes del bitmap empaquetado (usando el encoder del caso de prueba)
+			// Primero, codificamos el string hexadecimal del bitmap con el encoder del caso de prueba
+			tc.field001Encoder.SetLength(len(packedBitmapBytes) * 2) // Longitud en caracteres hex
+			encodedBitmapForComparison, err := tc.field001Encoder.Encode(fmt.Sprintf("%X", packedBitmapBytes))
+			if err != nil {
+				t.Fatalf("Error al codificar el bitmap para comparación: %v", err)
+			}
+
+			if !bytes.Equal(encodedBitmapForComparison, tc.expectedPackedBytes) {
+				t.Errorf("Pack() bytes empaquetados incorrectos.\nEsperado: %x\nRecibido:  %x", tc.expectedPackedBytes, encodedBitmapForComparison)
+			}
+
+			// --- Test Unpack ---
+			// Necesitamos un pkgField.Field para Unpack
+			field001 := pkgField.Field{
+				Length:   len(tc.expectedPackedBytes), // Longitud del bitmap en bytes
+				Encoding: tc.field001Encoder,
+			}
+
+			_, unpackedBitmapSlice, err := Unpack(field001, tc.expectedPackedBytes, 0)
+			if err != nil {
+				t.Fatalf("Unpack() falló: %v", err)
+			}
+
+			// Verificar el slice de bitmap desempaquetado
+			if !reflect.DeepEqual(unpackedBitmapSlice, tc.expectedBitmapSlice) {
+				t.Errorf("Unpack() slice de bitmap incorrecto.\nEsperado: %v\nRecibido:  %v", tc.expectedBitmapSlice, unpackedBitmapSlice)
+			}
+		})
 	}
-
-	for i, v := range result {
-		if v != expectedResult[i] {
-			t.Fatalf(`UnpackBitmap(%x) - Result "%s" does not match "%s"`, data, result, expectedResult)
-		}
-	}
-
-	t.Logf(`UnpackBitmap(%x) - Result "%s" match "%s"`, data, result, expectedResult)
-
-	// Encoding ASCII
-	data = []byte{0x64, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x38, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x34}
-
-	fieldsPackager = pkgField.Field{}
-	fieldsPackager.Length = 16
-	fieldsPackager.Encoding = encoding.Ascii
-
-	_, result, err = Unpack(fieldsPackager, data, 0)
-	if err != nil {
-		t.Fatalf(`UnpackBitmap(%x) - Error %s`, data, err.Error())
-	}
-
-	if len(result) != len(expectedResult) {
-		t.Fatalf(`UnpackBitmap(%x) - Length is different`, data)
-	}
-
-	for i, v := range result {
-		if v != expectedResult[i] {
-			t.Fatalf(`UnpackBitmap(%x) - Result "%s" does not match "%s"`, data, result, expectedResult)
-
-		}
-	}
-
-	t.Logf(`UnpackBitmap(%x) - Result "%s" match "%s"`, data, result, expectedResult)
-
-	// Encoding EBCDIC
-	data = []byte{0x84, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF8, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF4}
-
-	fieldsPackager = pkgField.Field{}
-	fieldsPackager.Length = 16
-	fieldsPackager.Encoding = encoding.Ebcdic
-
-	_, result, err = Unpack(fieldsPackager, data, 0)
-	if err != nil {
-		t.Fatalf(`UnpackBitmap(%s) - Error %s`, data, err.Error())
-	}
-
-	if len(result) != len(expectedResult) {
-		t.Fatalf(`UnpackBitmap(%s) - Length is different - Result "%s" / Expected "%s"`, data, result, expectedResult)
-	}
-
-	for i, v := range result {
-		if v != expectedResult[i] {
-			t.Fatalf(`UnpackBitmap(%s) - Result "%s" does not match "%s"`, data, result, expectedResult)
-		}
-	}
-
-	t.Logf(`UnpackBitmap(%x) - Result "%s" match "%s"`, data, result, expectedResult)
-}
-
-// TestPackBitmap calls message.PackBitmap
-func TestPackBitmap(t *testing.T) {
-	expectedResultArr := []string{"004", "011"}
-	expectedResult := []byte{0x10, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-
-	fields := make(map[string]string)
-
-	fields["004"] = "000001000000"
-	fields["011"] = "000001"
-
-	resultArr, result, err := Pack(fields)
-	if err != nil {
-		t.Fatalf(`PackBitmap(%s) - Error %s`, expectedResultArr, err.Error())
-	}
-
-	if !bytes.Equal(result, expectedResult) {
-		t.Fatalf(`PackBitmap(%s) - Result "%s" does not match "%s"`, expectedResultArr, result, expectedResult)
-	}
-
-	t.Logf(`PackBitmap(%s) - Result "%x" match "%x"`, expectedResultArr, result, expectedResult)
-
-	if len(resultArr) != len(expectedResultArr) {
-		t.Fatalf(`UnpackBitmap(%s) - Length is different - Result "%s" / Expected "%s"`, expectedResultArr, resultArr, expectedResultArr)
-	}
-
-	for i, v := range resultArr {
-		if v != expectedResultArr[i] {
-			t.Fatalf(`UnpackBitmap(%s) - Result "%s" does not match "%s"`, expectedResultArr, resultArr, expectedResultArr)
-		}
-	}
-
-	t.Logf(`PackBitmap(%s) - Result Arr "%s" match "%s"`, expectedResultArr, resultArr, expectedResultArr)
 }

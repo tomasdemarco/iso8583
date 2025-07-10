@@ -2,68 +2,71 @@ package prefix
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/tomasdemarco/iso8583/encoding"
 	"testing"
 )
 
-var (
-	Prefixes                 = []Type{LL, LLL}
-	PrefixEncoding           = []encoding.Encoding{encoding.Bcd, encoding.Hex, encoding.Ascii, encoding.Ebcdic}
-	PrefixValues             = [][]byte{{0x06}, {0x06}, {0x30, 0x36}, {0xF0, 0xF6}, {0x00, 0x06}, {0x00, 0x06}, {0x30, 0x30, 0x36}, {0xF0, 0xF0, 0xF6}}
-	ResultPrefixValues       = []int{6, 6, 6, 6, 6, 6, 6, 6}
-	ResultPrefixLengthValues = []int{1, 1, 2, 2, 2, 2, 3, 3}
-)
+func TestPrefixersRoundTrip(t *testing.T) {
+	ll := LL
+	lll := LLL
+	testCases := []struct {
+		name            string
+		prefixer        Prefixer
+		length          int
+		expectedBytes   []byte
+		expectEncodeErr bool
+	}{
+		// --- ASCII Prefixer Cases ---
+		{"ASCII LL, len 7", NewAsciiPrefixer(ll.EnumIndex(), false, false), 7, []byte{'0', '7'}, false},
+		{"ASCII LL, len 99", NewAsciiPrefixer(ll.EnumIndex(), false, false), 99, []byte{'9', '9'}, false},
+		{"ASCII LL, len 100 (error)", NewAsciiPrefixer(ll.EnumIndex(), false, false), 100, nil, true},
+		{"ASCII LLL, len 123", NewAsciiPrefixer(lll.EnumIndex(), false, false), 123, []byte{'1', '2', '3'}, false},
+		{"ASCII LLL, len 999", NewAsciiPrefixer(lll.EnumIndex(), false, false), 999, []byte{'9', '9', '9'}, false},
+		{"ASCII LLL, len 1000 (error)", NewAsciiPrefixer(lll.EnumIndex(), false, false), 1000, nil, true},
 
-// TestUnpackPrefix calls message.UnpackPrefix
-func TestUnpackPrefix(t *testing.T) {
-	for p, prefixType := range Prefixes {
-		for pe, prefixEncoding := range PrefixEncoding {
-			data := PrefixValues[pe+(p*4)]
+		// --- BCD Prefixer Cases ---
+		{"BCD LL, len 7", NewBcdPrefixer(ll.EnumIndex(), false, false), 7, []byte{0x07}, false},
+		{"BCD LL, len 12", NewBcdPrefixer(ll.EnumIndex(), false, false), 12, []byte{0x12}, false},
+		{"BCD LL, len 99", NewBcdPrefixer(ll.EnumIndex(), false, false), 99, []byte{0x99}, false},
+		{"BCD LLL, len 123", NewBcdPrefixer(lll.EnumIndex(), false, false), 123, []byte{0x01, 0x23}, false},
+		{"BCD LLL, len 999", NewBcdPrefixer(lll.EnumIndex(), false, false), 999, []byte{0x09, 0x99}, false},
 
-			var prefix Prefix
-			prefix.Type = prefixType
-			prefix.Encoding = prefixEncoding
-
-			resultPrefix, resultPrefixLength, err := Unpack(prefix, data)
-			fmt.Println(resultPrefix, resultPrefixLength)
-			if err != nil {
-				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Error %s`, data, prefixType.String(), prefixEncoding.String(), err.Error())
-			}
-
-			if resultPrefix != ResultPrefixValues[pe+(p*4)] {
-				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
-			}
-			t.Logf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefix, ResultPrefixValues[pe+(p*4)])
-
-			if resultPrefixLength != ResultPrefixLengthValues[pe+(p*4)] {
-				t.Fatalf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d does not match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
-			}
-			t.Logf(`UnpackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Result %d match %d`, data, prefixType.String(), prefixEncoding.String(), resultPrefixLength, ResultPrefixLengthValues[pe+(p*4)])
-		}
+		// --- Binary Prefixer Cases ---
+		{"Binary LL, len 255", NewBinaryPrefixer(ll.EnumIndex(), false), 255, []byte{0xff}, false},
+		{"Binary LL, len 256 (error)", NewBinaryPrefixer(ll.EnumIndex(), false), 256, nil, true},
+		{"Binary LLL, len 256", NewBinaryPrefixer(lll.EnumIndex(), false), 256, []byte{0x01, 0x00}, false},
+		{"Binary LLL, len 65535", NewBinaryPrefixer(lll.EnumIndex(), false), 65535, []byte{0xff, 0xff}, false},
+		{"Binary LLL, len 65536 (error)", NewBinaryPrefixer(lll.EnumIndex(), false), 65536, nil, true},
 	}
-}
 
-// TestPackPrefix calls encoding.PackPrefix
-func TestPackPrefix(t *testing.T) {
-	for p, prefixType := range Prefixes {
-		for pe, prefixEncoding := range PrefixEncoding {
-			data := "000001"
-			expectedResult := PrefixValues[pe+(p*4)]
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// --- Test EncodeLength ---
+			encoded, err := tc.prefixer.EncodeLength(tc.length)
 
-			var prefix Prefix
-			prefix.Type = prefixType
-			prefix.Encoding = prefixEncoding
+			if tc.expectEncodeErr {
+				if err == nil {
+					t.Fatalf("EncodeLength() esperaba un error, pero no lo obtuvo")
+				}
+				return // Prueba de error finalizada
+			}
 
-			result, err := Pack(prefix, len(data))
 			if err != nil {
-				t.Fatalf(`PackPrefix(%x) - Prefix=%s - PrefixEncoding=%s - Error %s`, data, prefixType.String(), prefixEncoding.String(), err.Error())
+				t.Fatalf("EncodeLength() falló: %v", err)
 			}
 
-			if !bytes.Equal(result, expectedResult) {
-				t.Fatalf(`Prefix(%s) - Prefix=%s - PrefixEncoding=%s - Result "%x" does not match "%x"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
+			if !bytes.Equal(tc.expectedBytes, encoded) {
+				t.Fatalf("EncodeLength() bytes incorrectos. Esperado: %x, Recibido: %x", tc.expectedBytes, encoded)
 			}
-			t.Logf(`Prefix(%s) - Prefix=%s - PrefixEncoding=%s - Result "%x" match "%x"`, data, prefixType.String(), prefixEncoding.String(), result, expectedResult)
-		}
+
+			// --- Test DecodeLength ---
+			decoded, err := tc.prefixer.DecodeLength(encoded, 0)
+			if err != nil {
+				t.Fatalf("DecodeLength() falló: %v", err)
+			}
+
+			if tc.length != decoded {
+				t.Fatalf("DecodeLength() longitud incorrecta. Esperado: %d, Recibido: %d", tc.length, decoded)
+			}
+		})
 	}
 }

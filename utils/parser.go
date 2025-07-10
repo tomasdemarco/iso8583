@@ -1,3 +1,4 @@
+// Package utils provides various utility functions used across the ISO 8583 library.
 package utils
 
 import (
@@ -5,6 +6,8 @@ import (
 	"strconv"
 )
 
+// Hex2Byte converts a hexadecimal string to a byte slice.
+// It expects an even-length hexadecimal string.
 func Hex2Byte(str string) []byte {
 	slen := len(str)
 	bHex := make([]byte, len(str)/2)
@@ -21,6 +24,8 @@ func Hex2Byte(str string) []byte {
 	return bHex
 }
 
+// Bin2Hex converts a binary string to its hexadecimal string representation.
+// It returns "error" if the input string is not a valid binary number.
 func Bin2Hex(s string) string {
 	ui, err := strconv.ParseUint(s, 2, 64)
 	if err != nil {

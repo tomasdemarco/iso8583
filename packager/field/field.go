@@ -8,6 +8,8 @@ import (
 	"regexp"
 )
 
+// Field represents an ISO 8583 field's definition, including its data type,
+// length, validation pattern, encoding, prefix, and padding rules.
 type Field struct {
 	Description string           `json:"description"`
 	Type        Type             `json:"type"`
@@ -18,6 +20,10 @@ type Field struct {
 	Padding     padding.Padder   `json:"padding"`
 }
 
+// Unpack unpacks a field's value from a raw message byte slice.
+// It handles length prefixes, padding, and decoding based on the field's configuration.
+// It returns the unpacked field value as a string, the total length consumed in bytes,
+// and an error if unpacking fails.
 func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 
 	var length int
@@ -64,6 +70,10 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 	return value, length + f.Prefix.GetPackedLength(), nil
 }
 
+// Pack packs a field's string value into a byte slice according to its configuration.
+// It applies padding, encodes the value, and prepends the length prefix if defined.
+// It returns the packed field as a byte slice, the plain (padded) field string,
+// and an error if packing fails.
 func (f Field) Pack(value string) ([]byte, string, error) {
 	padLeft, padRight, err := f.Padding.EncodePad(f.Length, len(value), f.Encoding)
 	if err != nil {

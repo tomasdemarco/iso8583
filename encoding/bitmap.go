@@ -1,33 +1,34 @@
 package encoding
 
 import (
+	"encoding/binary"
 	"fmt"
-	"github.com/tomasdemarco/iso8583/utils"
 	"strconv"
 )
 
-func BitmapDecode(value []byte, initBit int) ([]string, error) {
-
-	primaryBitmap, err := strconv.ParseUint(fmt.Sprintf("%x", value[:8]), 16, 64)
-	if err != nil {
-		return nil, err
+// BitmapDecode decodifica un slice de bytes de bitmap en un slice de strings de campos.
+func BitmapDecode(bitmapBytes []byte, initBit int) ([]string, error) {
+	if len(bitmapBytes) < 8 {
+		return nil, fmt.Errorf("se requieren al menos 8 bytes para el bitmap primario, se obtuvieron %d", len(bitmapBytes))
 	}
 
+	primaryBitmap := binary.BigEndian.Uint64(bitmapBytes[:8])
 	bitmapBinary := fmt.Sprintf("%064b", primaryBitmap)
 
-	if len(value) == 16 {
-		secondaryBitmap, err := strconv.ParseUint(fmt.Sprintf("%x", value[8:]), 16, 64)
-		if err != nil {
-			return nil, err
+	// El bit 1 (el más significativo del primer byte) indica la presencia de un bitmap secundario.
+	// Si el bit 1 está activo, el valor del primer byte será >= 0x80.
+	if (bitmapBytes[0] & 0x80) != 0 { // Comprobar si el bit 1 está activo
+		if len(bitmapBytes) < 16 {
+			return nil, fmt.Errorf("se requieren 16 bytes para el bitmap secundario, se obtuvieron %d", len(bitmapBytes))
 		}
-
+		secondaryBitmap := binary.BigEndian.Uint64(bitmapBytes[8:16])
 		bitmapBinary += fmt.Sprintf("%064b", secondaryBitmap)
 	}
 
 	sliceBitmap := make([]string, 0)
 
-	for i := 0; i < len(bitmapBinary); i++ {
-		if bitmapBinary[i] == '1' {
+	for i, bit := range bitmapBinary {
+		if bit == '1' {
 			str := fmt.Sprintf("%03d", i+initBit)
 			sliceBitmap = append(sliceBitmap, str)
 		}
@@ -36,47 +37,73 @@ func BitmapDecode(value []byte, initBit int) ([]string, error) {
 	return sliceBitmap, nil
 }
 
-func BitmapEncode(value []string) ([]byte, error) {
-	var bitmap string
-	bitmapArray := make(map[int]string)
-
-	numberBits := 64
-
-	for _, i := range value {
-		val, err := strconv.Atoi(i)
+// BitmapEncode codifica un slice de strings de campos en un slice de bytes de bitmap.
+func BitmapEncode(fieldNumbers []string) ([]byte, error) {
+	// Determinar si se necesita un bitmap secundario (si hay campos > 64)
+	needsSecondary := false
+	for _, fn := range fieldNumbers {
+		num, err := strconv.Atoi(fn)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("número de campo inválido: %s", fn)
 		}
-
-		bitmapArray[val] = "1"
-
-		if val > 64 {
-			numberBits = 128
-			bitmapArray[1] = "1"
+		if num > 64 {
+			needsSecondary = true
+			break
 		}
 	}
 
-	for i := 1; i <= numberBits; i++ {
-		if _, ok := bitmapArray[i]; ok {
-			bitmap += "1"
+	// Crear un slice de booleanos para representar los bits
+	numBits := 64
+	if needsSecondary {
+		numBits = 128
+	}
+	bits := make([]bool, numBits+1) // +1 para usar índices 1-basados
+
+	// Marcar los bits correspondientes a los números de campo
+	for _, fn := range fieldNumbers {
+		num, _ := strconv.Atoi(fn)
+		if num > 0 && num <= numBits {
+			bits[num] = true
+		}
+	}
+
+	// Activar el bit 1 si hay un bitmap secundario
+	// Esto se hace si needsSecondary es true, ya que el bit 1 indica la presencia del secundario.
+	if needsSecondary {
+		bits[1] = true
+	}
+
+	// Convertir el slice de bits a un string binario
+	var binaryString string
+	for i := 1; i <= numBits; i++ {
+		if bits[i] {
+			binaryString += "1"
 		} else {
-			bitmap += "0"
+			binaryString += "0"
 		}
 	}
 
-	primaryBitmap, err := strconv.ParseUint(bitmap[:64], 2, 64)
+	// Convertir el string binario a bytes
+	var result []byte
+	primaryBinary := binaryString[:64]
+	primaryUint, err := strconv.ParseUint(primaryBinary, 2, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error al parsear bitmap primario: %w", err)
 	}
-	result := fmt.Sprintf("%016x", primaryBitmap)
+	primaryBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(primaryBytes, primaryUint)
+	result = append(result, primaryBytes...)
 
-	if len(bitmap) > 64 {
-		secondary, err := strconv.ParseUint(bitmap[64:], 2, 64)
+	if needsSecondary {
+		secondaryBinary := binaryString[64:]
+		secondaryUint, err := strconv.ParseUint(secondaryBinary, 2, 64)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error al parsear bitmap secundario: %w", err)
 		}
-		result += fmt.Sprintf("%016x", secondary)
+		secondaryBytes := make([]byte, 8)
+		binary.BigEndian.PutUint64(secondaryBytes, secondaryUint)
+		result = append(result, secondaryBytes...)
 	}
 
-	return utils.Hex2Byte(result), nil
+	return result, nil
 }

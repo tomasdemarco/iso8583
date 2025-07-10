@@ -1,3 +1,4 @@
+// Package field defines the structure and behavior of ISO 8583 fields.
 package field
 
 import (
@@ -5,6 +6,7 @@ import (
 	"fmt"
 )
 
+// Type represents the data type of an ISO 8583 field.
 type Type int
 
 const (
@@ -15,6 +17,7 @@ const (
 	Bitmap
 )
 
+// typeStrings maps Type constants to their string representations.
 var typeStrings = [...]string{
 	None:    "NONE",
 	Numeric: "NUMERIC",
@@ -23,17 +26,18 @@ var typeStrings = [...]string{
 	Bitmap:  "BITMAP",
 }
 
-// String return string
-func (t *Type) String() string {
-	return typeStrings[*t]
+// String returns the string representation of a Type.
+func (t Type) String() string {
+	return typeStrings[t]
 }
 
-// EnumIndex return index
-func (t *Type) EnumIndex() int {
-	return int(*t)
+// EnumIndex returns the integer index of a Type.
+func (t Type) EnumIndex() int {
+	return int(t)
 }
 
-// UnmarshalJSON override default unmarshal json
+// UnmarshalJSON overrides the default JSON unmarshaling for Type.
+// It allows deserializing Type from its string representation.
 func (t *Type) UnmarshalJSON(b []byte) error {
 	var j string
 	err := json.Unmarshal(b, &j)

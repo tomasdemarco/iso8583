@@ -6,6 +6,7 @@ import (
 )
 
 // AsciiPrefixer implements the Prefixer interface for ASCII length encoding.
+// It encodes and decodes lengths as ASCII digits.
 type AsciiPrefixer struct {
 	nDigits     int
 	encoder     encoding.Encoder
@@ -13,6 +14,7 @@ type AsciiPrefixer struct {
 	isInclusive bool
 }
 
+// ASCII provides pre-configured AsciiPrefixer instances for common length types.
 var ASCII = Prefixers{
 	L:      &AsciiPrefixer{1, &encoding.ASCII{}, false, false},
 	LL:     &AsciiPrefixer{2, &encoding.ASCII{}, false, false},
@@ -22,14 +24,18 @@ var ASCII = Prefixers{
 	LLLLLL: &AsciiPrefixer{6, &encoding.ASCII{}, false, false},
 }
 
-// NewAsciiPrefixer creates a new Prefixer with the specified number of digits.
+// NewAsciiPrefixer creates a new AsciiPrefixer with the specified number of digits.
+// The `hex` parameter indicates if the length should be treated as hexadecimal.
+// The `isInclusive` parameter indicates if the encoded length includes the prefix's own length.
 func NewAsciiPrefixer(nDigits int, hex, isInclusive bool) Prefixer {
 	return &AsciiPrefixer{nDigits, &encoding.ASCII{}, hex, isInclusive}
 }
 
-// EncodeLength encodes the length into the byte slice.
+// EncodeLength encodes the given integer length into an ASCII byte slice.
+// It returns the encoded length as a byte slice and an error if encoding fails
+// or if the length exceeds the maximum allowed for the configured number of digits.
 func (p *AsciiPrefixer) EncodeLength(length int) ([]byte, error) {
-	length, err := lengthInt(length, p.hex)
+	err := validateMaxLimit(length, p.nDigits, p.hex)
 	if err != nil {
 		return nil, err
 	}
@@ -38,10 +44,13 @@ func (p *AsciiPrefixer) EncodeLength(length int) ([]byte, error) {
 		length += p.nDigits
 	}
 
-	return p.encoder.Encode(fmt.Sprintf("%0*d", p.nDigits, length))
+	lenStr := intToLenStr(length, p.hex)
+
+	return p.encoder.Encode(fmt.Sprintf("%0*s", p.nDigits, lenStr))
 }
 
-// DecodeLength decodes the length from the byte slice.
+// DecodeLength decodes an ASCII length from the provided byte slice starting at the given offset.
+// It returns the decoded integer length and an error if decoding fails.
 func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 	p.encoder.SetLength(p.nDigits)
 
@@ -50,7 +59,7 @@ func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 		return 0, err
 	}
 
-	length, err := lengthStringToInt(lengthString, p.hex)
+	length, err := lenStrToInt(lengthString, p.hex)
 	if err != nil {
 		return 0, err
 	}
@@ -62,15 +71,7 @@ func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 	return length, nil
 }
 
-// GetPackedLength returns the number of digits used to encode the length.
+// GetPackedLength returns the number of ASCII digits used to encode the length.
 func (p *AsciiPrefixer) GetPackedLength() int {
 	return p.nDigits
-}
-
-func (p *AsciiPrefixer) SetHex(hex bool) {
-	p.hex = hex
-}
-
-func (p *AsciiPrefixer) SetIsInclusive(isInclusive bool) {
-	p.isInclusive = isInclusive
 }

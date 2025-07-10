@@ -1,3 +1,5 @@
+// Package message provides functionalities for packing and unpacking
+// ISO 8583 messages.
 package message
 
 import (
@@ -8,6 +10,8 @@ import (
 	"github.com/tomasdemarco/iso8583/packager"
 )
 
+// Message represents an ISO 8583 message, containing its structure,
+// fields, and the associated packager.
 type Message struct {
 	Packager *packager.Packager
 	Length   int
@@ -18,12 +22,17 @@ type Message struct {
 	TagsEmv  map[string]string
 }
 
+// NewMessage creates and returns a new Message instance
+// initialized with the provided packager.
 func NewMessage(packager *packager.Packager) *Message {
 	return &Message{
 		Packager: packager,
 	}
 }
 
+// Unpack unpacks a byte slice of an ISO 8583 message
+// into the Message structure, populating its fields.
+// It returns an error if unpacking fails.
 func (m *Message) Unpack(messageRaw []byte) (err error) {
 	length, err := m.unpackMti(messageRaw)
 	if err != nil {
@@ -54,6 +63,9 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 	return nil
 }
 
+// Pack packs the message fields into an ISO 8583 byte slice.
+// It calculates the bitmap and encodes each field according to the packager's configuration.
+// It returns the packed message as a byte slice, and an error if packing fails.
 func (m *Message) Pack() ([]byte, error) {
 
 	bitmapSlice, bitmapString, err := bitmap.Pack(m.Fields)
@@ -67,9 +79,7 @@ func (m *Message) Pack() ([]byte, error) {
 
 	msgPacked := new(bytes.Buffer)
 	for _, k := range m.Bitmap {
-		var value string
-
-		value = m.Fields[k]
+		value := m.Fields[k]
 
 		encodeField, plainField, errPack := m.Packager.Fields[k].Pack(value)
 		if errPack != nil {
@@ -83,16 +93,18 @@ func (m *Message) Pack() ([]byte, error) {
 	return msgPacked.Bytes(), err
 }
 
+// SetField sets the value of a specific field in the message.
+// If the fields map not initialized, it creates it.
 func (m *Message) SetField(fieldId string, value string) {
 	if m.Fields == nil {
 		var fields = make(map[string]string)
 		m.Fields = fields
 	}
-	fieldAux := m.Fields[fieldId]
-	fieldAux = value
-	m.Fields[fieldId] = fieldAux
+	m.Fields[fieldId] = value
 }
 
+// GetField retrieves the value of a specific field from the message.
+// It returns the fields value as a string, and an error if the field does not exist.
 func (m *Message) GetField(fieldId string) (string, error) {
 	if fld, ok := m.Fields[fieldId]; ok {
 		return fld, nil
@@ -101,6 +113,8 @@ func (m *Message) GetField(fieldId string) (string, error) {
 	return "", fmt.Errorf(`the message does not contain the field with the id "%s"`, fieldId)
 }
 
+// unpackMti unpacks the Message Type Indicator (MTI) from the message.
+// This is an internal helper method.
 func (m *Message) unpackMti(messageRaw []byte) (int, error) {
 	if _, ok := m.Packager.Fields["000"]; !ok {
 		return 0, errors.New("packager does not contain field 000")
@@ -120,6 +134,8 @@ func (m *Message) unpackMti(messageRaw []byte) (int, error) {
 	return length, nil
 }
 
+// unpackBitmap unpacks the bitmap from the message.
+// This is an internal helper method.
 func (m *Message) unpackBitmap(messageRaw []byte, offset int) (int, error) {
 
 	if _, ok := m.Packager.Fields["001"]; !ok {

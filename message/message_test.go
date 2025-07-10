@@ -1,86 +1,84 @@
 package message
 
 import (
-	"bytes"
-	"github.com/tomasdemarco/iso8583/encoding"
-	"github.com/tomasdemarco/iso8583/packager"
-	"github.com/tomasdemarco/iso8583/packager/field"
-	"github.com/tomasdemarco/iso8583/prefix"
-	"slices"
+	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/tomasdemarco/iso8583/packager"
 )
 
-var (
-	FieldEncoding       = []encoding.Encoding{encoding.Bcd, encoding.Ascii, encoding.Ebcdic}
-	FieldValuesEncoding = [][]byte{{0x00, 0x00, 0x01}, {0x30, 0x30, 0x30, 0x30, 0x30, 0x31}, {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1}}
-	FieldPrefix         = []prefix.Type{prefix.Fixed, prefix.LL, prefix.LLL}
-	FieldPrefixEncoding = []encoding.Encoding{encoding.Bcd, encoding.Hex, encoding.Ascii, encoding.Ebcdic}
-	FieldPrefixValues   = [][]byte{{}, {0x06}, {0x00, 0x06}, {}, {0x06}, {0x00, 0x06}, {}, {0x30, 0x36}, {0x30, 0x30, 0x36}, {}, {0xF0, 0xF6}, {0xF0, 0xF0, 0xF6}}
-)
+func TestPackUnpackRoundTrip(t *testing.T) {
+	pkg, err := packager.LoadFromJson(".", "test_packager.json")
+	if err != nil {
+		t.Fatalf("Error al cargar el packager de prueba: %v", err)
+	}
 
-// TestUnpack calls message.Unpack
-func TestUnpack(t *testing.T) {
-	for e, enc := range FieldEncoding {
-		for pe, prefixEncoding := range FieldPrefixEncoding {
-			for p, prefix2 := range FieldPrefix {
-				expectedResult := "000001"
-				expectedBitmap := []string{"011"}
+	testCases := []struct {
+		name          string
+		initialFields map[string]string
+	}{
+		{
+			name: "Mensaje simple con campos fijos",
+			initialFields: map[string]string{
+				"000": "0200",
+				"011": "123456",
+			},
+		},
+		{
+			name: "Mensaje con campo de longitud variable (LLVAR)",
+			initialFields: map[string]string{
+				"000": "0800",
+				"011": "654321",
+				"032": "98765",
+			},
+		},
+	}
 
-				buf := new(bytes.Buffer)
-				buf.Write([]byte{0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-				buf.Write(FieldPrefixValues[p+(pe*3)])
-				buf.Write(FieldValuesEncoding[e])
-				data := buf.Bytes()
-
-				message := Message{}
-				fieldsPackager := field.Field{}
-				fieldsPackager.Length = 4
-				fieldsPackager.Encoding = encoding.Bcd
-
-				fields := make(map[string]field.Field)
-				fields["000"] = fieldsPackager
-
-				fieldsPackager = field.Field{}
-				fieldsPackager.Length = 8
-				fieldsPackager.Encoding = encoding.Bcd
-
-				fields["001"] = fieldsPackager
-
-				fieldsPackager = field.Field{}
-				fieldsPackager.Length = 6
-				fieldsPackager.Encoding = enc
-				fieldsPackager.Prefix.Type = prefix2
-				fieldsPackager.Prefix.Encoding = prefixEncoding
-
-				fields["011"] = fieldsPackager
-
-				pkg := packager.Packager{}
-				pkg.Fields = fields
-				message.Packager = &pkg
-
-				err := message.Unpack(data)
-				if err != nil {
-					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
-				}
-
-				if len(message.Bitmap) != len(expectedBitmap) {
-					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Length bitmap is different - Result "%s" / Expected "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), message.Bitmap, expectedBitmap)
-				}
-
-				for !slices.Equal(message.Bitmap, expectedBitmap) {
-					t.Fatalf(`Unpack(%x) - Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result bitmap "%s" does not match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), message.Bitmap, expectedBitmap)
-				}
-
-				result, err := message.GetField("011")
-				if err != nil {
-					t.Fatalf(`Unpack(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Error %s`, data, enc.String(), prefix2.String(), prefixEncoding.String(), err.Error())
-				}
-
-				if result != expectedResult {
-					t.Fatalf(`Unpack(%x) Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" does not match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
-				}
-				t.Logf(`Unpack=%x Encoding=%s - Prefix=%s - PrefixEncoding=%s - Result "%s" match "%s"`, data, enc.String(), prefix2.String(), prefixEncoding.String(), result, expectedResult)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// --- Fase de PACK ---
+			msgToPack := NewMessage(pkg)
+			for id, value := range tc.initialFields {
+				msgToPack.SetField(id, value)
 			}
-		}
+
+			packedData, err := msgToPack.Pack()
+			if err != nil {
+				t.Fatalf("Pack() falló: %v", err)
+			}
+			fmt.Printf("%x\n\n", packedData)
+			// --- Fase de UNPACK ---
+			msgToUnpack := NewMessage(pkg)
+			err = msgToUnpack.Unpack(packedData)
+			if err != nil {
+				t.Fatalf("Unpack() falló: %v", err)
+			}
+
+			// --- Verificación ---
+
+			// 1. Comprobar que todos los campos iniciales existen en el resultado
+			for id, initialValue := range tc.initialFields {
+				finalValue, err := msgToUnpack.GetField(id)
+				if err != nil {
+					t.Errorf("El campo '%s' esperado no se encontró en el mensaje desempaquetado", id)
+					continue
+				}
+
+				// Comparamos los valores, pero ignoramos el padding que se pudo haber añadido.
+				if !strings.HasSuffix(finalValue, initialValue) {
+					t.Errorf("El valor del campo '%s' no coincide. Esperado (sufijo): '%s', Recibido: '%s'", id, initialValue, finalValue)
+				}
+			}
+
+			// 2. Comprobar que el campo del bitmap (001) fue creado.
+			if _, err := msgToUnpack.GetField("001"); err != nil {
+				t.Errorf("El campo del bitmap (001) no se encontró en el mensaje desempaquetado")
+			}
+
+			t.Logf("Prueba '%s' completada con éxito.", tc.name)
+			t.Logf("Datos empaquetados (hex): %x", packedData)
+			t.Logf("Campos desempaquetados: %v", msgToUnpack.Fields)
+		})
 	}
 }

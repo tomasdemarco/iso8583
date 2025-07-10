@@ -5,44 +5,110 @@ import (
 	"testing"
 )
 
-var (
-	Encodings      = []Encoding{Bcd, Ascii, Ebcdic}
-	ValuesEncoding = [][]byte{{0x00, 0x00, 0x01}, {0x30, 0x30, 0x30, 0x30, 0x30, 0x31}, {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1}}
-)
+func TestEncodersRoundTrip(t *testing.T) {
+	testCases := []struct {
+		name           string
+		encoder        Encoder
+		inputString    string
+		expectedBytes  []byte
+		expectedString string
+		setLength      int // Longitud a establecer en el encoder antes de Encode/Decode
+	}{
+		// --- ASCII Encoder ---
+		{
+			name:           "ASCII - 'Hello'",
+			encoder:        &ASCII{},
+			inputString:    "Hello",
+			expectedBytes:  []byte{0x48, 0x65, 0x6c, 0x6c, 0x6f},
+			expectedString: "Hello",
+			setLength:      5,
+		},
+		{
+			name:           "ASCII - '123456'",
+			encoder:        &ASCII{},
+			inputString:    "123456",
+			expectedBytes:  []byte{0x31, 0x32, 0x33, 0x34, 0x35, 0x36},
+			expectedString: "123456",
+			setLength:      6,
+		},
 
-// TestUnpackEncoding calls message.UnpackEncoding
-func TestUnpackEncoding(t *testing.T) {
-	for e, enc := range Encodings {
-		data := ValuesEncoding[e]
-		expectedResult := "000001"
+		// --- BCD Encoder ---
+		{
+			name:           "BCD - '123456'",
+			encoder:        NewBcdEncoder(false), // No padLeft para este caso
+			inputString:    "123456",
+			expectedBytes:  []byte{0x12, 0x34, 0x56},
+			expectedString: "123456",
+			setLength:      3,
+		},
+		{
+			name:           "BCD - '012345' (padLeft)",
+			encoder:        NewBcdEncoder(true), // padLeft para este caso
+			inputString:    "012345",
+			expectedBytes:  []byte{0x01, 0x23, 0x45},
+			expectedString: "012345",
+			setLength:      3,
+		},
+		{
+			name:           "BCD - '123' (padLeft)",
+			encoder:        NewBcdEncoder(true), // padLeft para este caso
+			inputString:    "123",
+			expectedBytes:  []byte{0x01, 0x23},
+			expectedString: "0123", // BCD decodifica a longitud par
+			setLength:      2,
+		},
 
-		result, err := Unpack(enc, data)
-		if err != nil {
-			t.Fatalf(`UnpackEncoding(%x) Encoding=%s - Error %s`, data, enc.String(), err.Error())
-		}
+		// --- BINARY Encoder (asumiendo que maneja hex strings) ---
+		{
+			name:           "BINARY - 'FF'",
+			encoder:        NewBinaryEncoder(),
+			inputString:    "FF",
+			expectedBytes:  []byte{0xFF},
+			expectedString: "FF",
+			setLength:      1,
+		},
+		{
+			name:           "BINARY - '0100'",
+			encoder:        NewBinaryEncoder(),
+			inputString:    "0100",
+			expectedBytes:  []byte{0x01, 0x00},
+			expectedString: "0100",
+			setLength:      2,
+		},
 
-		if result != expectedResult {
-			t.Fatalf(`UnpackEncoding(%x) Encoding=%s - Result "%s" does not match "%s"`, data, enc.String(), result, expectedResult)
-		}
-		t.Logf(`UnpackEncoding(%x) Encoding=%s - Result "%s" match "%s"`, data, enc.String(), result, expectedResult)
+		// --- EBCDIC Encoder (ejemplo simple) ---
+		{
+			name:           "EBCDIC - 'Hello'",
+			encoder:        &EBCDIC{},
+			inputString:    "Hello",
+			expectedBytes:  []byte{0xC8, 0x85, 0x93, 0x93, 0x96},
+			expectedString: "Hello",
+			setLength:      5,
+		},
 	}
-}
 
-// TestPackEncoding calls encoding.PackEncoding
-func TestPackEncoding(t *testing.T) {
-	for e, enc := range Encodings {
-		data := "000001"
-		expectedResult := ValuesEncoding[e]
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Establecer la longitud si es necesario
+			tc.encoder.SetLength(tc.setLength)
 
-		result, err := Pack(enc, data)
-		if err != nil {
-			t.Fatalf(`PackEncoding(%s) - Error %s`, data, err.Error())
-		}
+			// --- Test Encode ---
+			encodedBytes, err := tc.encoder.Encode(tc.inputString)
+			if err != nil {
+				t.Fatalf("Encode() falló: %v", err)
+			}
+			if !bytes.Equal(encodedBytes, tc.expectedBytes) {
+				t.Errorf("Encode() bytes incorrectos.\nEsperado: %x\nRecibido:  %x", tc.expectedBytes, encodedBytes)
+			}
 
-		if !bytes.Equal(result, expectedResult) {
-			t.Fatalf(`PackEncoding(%s) Encoding=%s - Result "%x" does not match "%x"`, data, enc.String(), result, expectedResult)
-		}
-
-		t.Logf(`PackEncoding(%s) Encoding=%s - Result "%x" match "%x"`, data, enc.String(), result, expectedResult)
+			// --- Test Decode ---
+			decodedString, err := tc.encoder.Decode(tc.expectedBytes)
+			if err != nil {
+				t.Fatalf("Decode() falló: %v", err)
+			}
+			if decodedString != tc.expectedString {
+				t.Errorf("Decode() string incorrecto.\nEsperado: %s\nRecibido:  %s", tc.expectedString, decodedString)
+			}
+		})
 	}
 }
