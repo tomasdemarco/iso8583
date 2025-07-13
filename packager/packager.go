@@ -12,5 +12,5 @@ import (
 type Packager struct {
 	Description string                 `json:"description"`
 	Prefix      prefix.Prefixer        `json:"prefix"`
-	Fields      map[string]field.Field `json:"fields"`
+	Fields      map[int]field.Packager `json:"fields"`
 }

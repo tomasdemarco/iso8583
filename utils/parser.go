@@ -31,5 +31,18 @@ func Bin2Hex(s string) string {
 	if err != nil {
 		return "error"
 	}
-	return fmt.Sprintf("%x", ui)
+	return fmt.Sprintf("%X", ui)
+}
+
+// Byte2BitSet convierte un array de bytes en un BitSet.
+// b: el array de bytes de entrada.
+// length: la longitud esperada en bytes del bitmap.
+// bitZeroExtended: si el bit 0 indica la presencia de un segundo bitmap.
+func Byte2BitSet(b []byte) (*BitSet, error) {
+
+	bitmap := NewBitSet(len(b)*8, 128)
+
+	copy(bitmap.bytes, b)
+
+	return bitmap, nil
 }

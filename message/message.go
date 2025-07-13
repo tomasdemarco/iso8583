@@ -4,10 +4,12 @@ package message
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tomasdemarco/iso8583/bitmap"
 	"github.com/tomasdemarco/iso8583/packager"
+	"github.com/tomasdemarco/iso8583/utils"
 )
 
 // Message represents an ISO 8583 message, containing its structure,
@@ -17,9 +19,10 @@ type Message struct {
 	Length   int
 	Header   interface{}
 	Trailer  interface{}
-	Bitmap   []string
-	Fields   map[string]string
-	TagsEmv  map[string]string
+	//Bitmap   []int
+	Bitmap2 *utils.BitSet
+	Fields  map[int]string
+	TagsEmv map[string]string
 }
 
 // NewMessage creates and returns a new Message instance
@@ -27,6 +30,7 @@ type Message struct {
 func NewMessage(packager *packager.Packager) *Message {
 	return &Message{
 		Packager: packager,
+		Bitmap2:  utils.NewBitSet(64, 128),
 	}
 }
 
@@ -48,15 +52,23 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 
 	position += length
 
-	for _, fieldId := range m.Bitmap {
-		if fieldId != "001" {
-			value, length, err := m.Packager.Fields[fieldId].Unpack(messageRaw, position)
-			if err != nil {
-				return fmt.Errorf("unpack field %s: %w", fieldId, err)
+	for _, fieldId := range m.Bitmap2.GetSliceString() {
+		if fieldId != 0 && fieldId != 1 {
+			if _, ok := m.Packager.Fields[fieldId]; !ok {
+				return fmt.Errorf("packager does not contain field %d", fieldId)
 			}
 
-			m.SetField(fieldId, value)
-			position += length
+			if fldPkg, ok := m.Packager.Fields[fieldId]; ok {
+				value, length, err := fldPkg.Unpack(messageRaw, position)
+				if err != nil {
+					return fmt.Errorf("unpack field %d: %w", fieldId, err)
+				}
+
+				m.SetField(fieldId, value)
+				position += length
+			} else {
+				return fmt.Errorf("unpack field %d: field packager not found", fieldId)
+			}
 		}
 	}
 
@@ -67,69 +79,139 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 // It calculates the bitmap and encodes each field according to the packager's configuration.
 // It returns the packed message as a byte slice, and an error if packing fails.
 func (m *Message) Pack() ([]byte, error) {
-
-	bitmapSlice, bitmapString, err := bitmap.Pack(m.Fields)
+	msgPacked := new(bytes.Buffer)
+	encodeField, err := m.packMti()
 	if err != nil {
 		return nil, err
 	}
+	msgPacked.Write(encodeField)
 
-	m.SetField("001", fmt.Sprintf("%x", bitmapString))
+	encodeField, err = m.packBitmap()
+	if err != nil {
+		return nil, err
+	}
+	msgPacked.Write(encodeField)
 
-	m.Bitmap = append(bitmapSlice[:1], append([]string{"001"}, bitmapSlice[1:]...)...)
+	for _, k := range m.Bitmap2.GetSliceString() {
+		if _, ok := m.Packager.Fields[k]; !ok {
+			return nil, fmt.Errorf("packager does not contain field %d", k)
+		}
 
-	msgPacked := new(bytes.Buffer)
-	for _, k := range m.Bitmap {
 		value := m.Fields[k]
 
 		encodeField, plainField, errPack := m.Packager.Fields[k].Pack(value)
 		if errPack != nil {
-			return nil, fmt.Errorf("pack field %s: %w", k, errPack)
+			return nil, fmt.Errorf("pack field %d: %w", k, errPack)
 		}
 		m.SetField(k, plainField)
 
 		msgPacked.Write(encodeField)
 	}
 
-	return msgPacked.Bytes(), err
+	return msgPacked.Bytes(), nil
 }
 
 // SetField sets the value of a specific field in the message.
 // If the fields map not initialized, it creates it.
-func (m *Message) SetField(fieldId string, value string) {
+func (m *Message) SetField(fieldId int, value string) {
 	if m.Fields == nil {
-		var fields = make(map[string]string)
+		var fields = make(map[int]string)
 		m.Fields = fields
 	}
+
 	m.Fields[fieldId] = value
+
+	if !m.Bitmap2.Get(fieldId) {
+		m.Bitmap2.Set(fieldId)
+	}
 }
 
 // GetField retrieves the value of a specific field from the message.
 // It returns the fields value as a string, and an error if the field does not exist.
-func (m *Message) GetField(fieldId string) (string, error) {
+func (m *Message) GetField(fieldId int) (string, error) {
 	if fld, ok := m.Fields[fieldId]; ok {
 		return fld, nil
 	}
 
-	return "", fmt.Errorf(`the message does not contain the field with the id "%s"`, fieldId)
+	return "", fmt.Errorf(`the message does not contain the field with the id "%d"`, fieldId)
+}
+
+func (m *Message) Log() string {
+
+	jsonStr := "{"
+	v, err := m.GetField(0)
+	if err != nil {
+		return ""
+	}
+
+	marshaledValue, _ := json.Marshal(v)
+	jsonStr += fmt.Sprintf(`"%d":%s`, 0, string(marshaledValue))
+	jsonStr += ","
+
+	marshaledValue, _ = json.Marshal(v)
+	jsonStr += fmt.Sprintf(`"%d":%s`, 1, m.Bitmap2.ToString())
+	jsonStr += ","
+
+	for i, k := range m.Bitmap2.GetSliceString() {
+		v, err = m.GetField(k)
+		if err != nil {
+			return ""
+		}
+
+		marshaledValue, _ = json.Marshal(v)
+		jsonStr += fmt.Sprintf(`"%d":%s`, k, string(marshaledValue))
+		if i < len(m.Bitmap2.GetSliceString())-1 {
+			jsonStr += ","
+		}
+	}
+	jsonStr += "}"
+
+	return jsonStr
+}
+
+func (m *Message) packMti() ([]byte, error) {
+	if _, ok := m.Packager.Fields[0]; !ok {
+		return nil, fmt.Errorf("packager does not contain field %d", 0)
+	}
+
+	encodeField, _, errPack := m.Packager.Fields[0].Pack(m.Fields[0])
+	if errPack != nil {
+		return nil, fmt.Errorf("pack mti: %w", errPack)
+	}
+
+	return encodeField, nil
+}
+
+func (m *Message) packBitmap() ([]byte, error) {
+	if _, ok := m.Packager.Fields[1]; !ok {
+		return nil, fmt.Errorf("packager does not contain field %d", 1)
+	}
+
+	if len(m.Bitmap2.ToBytes()) > 8 {
+		m.SetField(1, fmt.Sprintf("%X", m.Bitmap2.ToBytes()))
+	}
+
+	encodeField, _, errPack := m.Packager.Fields[1].Pack(m.Bitmap2.ToString())
+	if errPack != nil {
+		return nil, fmt.Errorf("pack bitmap: %w", errPack)
+	}
+
+	return encodeField, nil
 }
 
 // unpackMti unpacks the Message Type Indicator (MTI) from the message.
 // This is an internal helper method.
 func (m *Message) unpackMti(messageRaw []byte) (int, error) {
-	if _, ok := m.Packager.Fields["000"]; !ok {
-		return 0, errors.New("packager does not contain field 000")
+	if _, ok := m.Packager.Fields[0]; !ok {
+		return 0, errors.New("packager does not contain field 0")
 	}
 
-	value, length, err := m.Packager.Fields["000"].Unpack(messageRaw, 0)
+	value, length, err := m.Packager.Fields[0].Unpack(messageRaw, 0)
 	if err != nil {
-		return 0, fmt.Errorf("pack field 000: %w", err)
+		return 0, fmt.Errorf("pack field 0: %w", err)
 	}
 
-	if !m.Packager.Fields["000"].Pattern.MatchString(value) {
-		return 0, errors.New("invalid format in field 000")
-	}
-
-	m.SetField("000", value)
+	m.SetField(0, value)
 
 	return length, nil
 }
@@ -137,33 +219,17 @@ func (m *Message) unpackMti(messageRaw []byte) (int, error) {
 // unpackBitmap unpacks the bitmap from the message.
 // This is an internal helper method.
 func (m *Message) unpackBitmap(messageRaw []byte, offset int) (int, error) {
-
-	if _, ok := m.Packager.Fields["001"]; !ok {
-		return 0, errors.New("packager does not contain field 001")
+	if _, ok := m.Packager.Fields[1]; !ok {
+		return 0, errors.New("packager does not contain field 1")
 	}
 
-	if len(messageRaw) < offset+m.Packager.Fields["001"].Length {
-		return 0, errors.New("the message is too short to be unpacked")
-	}
-
-	length, sliceBitmap, err := bitmap.Unpack(m.Packager.Fields["001"], messageRaw, offset)
+	bMap, length, err := bitmap.Unpack(m.Packager.Fields[1], messageRaw, offset)
 	if err != nil {
 		return 0, fmt.Errorf("could not get bitmap: %w", err)
 	}
 
-	m.Bitmap = sliceBitmap
-
-	m.Packager.Fields["001"].Encoding.SetLength(length)
-	value, err := m.Packager.Fields["001"].Encoding.Decode(messageRaw[offset:])
-	if err != nil {
-		return 0, fmt.Errorf("unpack field 001: %w", err)
-	}
-
-	if !m.Packager.Fields["001"].Pattern.MatchString(value) {
-		return 0, fmt.Errorf("invalid format in field 001")
-	}
-
-	m.SetField("001", value)
+	m.Bitmap2 = bMap
+	m.SetField(1, bMap.ToString())
 
 	return length, nil
 }

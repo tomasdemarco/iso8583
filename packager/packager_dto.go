@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 )
 
 // PackagerDto represents the structure of a packager as defined in a JSON file.
@@ -72,14 +73,20 @@ func LoadFromJson(path, file string) (*Packager, error) {
 
 	pkg.Prefix = pf
 
-	fields := make(map[string]field.Field)
+	fields := make(map[int]field.Packager)
 
 	for k, v := range pkgDto.Fields {
 		fld, err := SetField(v)
 		if err != nil {
 			return nil, err
 		}
-		fields[k] = *fld
+
+		kNum, err := strconv.Atoi(k)
+		if err != nil {
+			return nil, fmt.Errorf("invalid field number: %s", k)
+		}
+
+		fields[kNum] = fld
 	}
 
 	pkg.Fields = fields
@@ -90,9 +97,9 @@ func LoadFromJson(path, file string) (*Packager, error) {
 // SetField converts a FieldDto (from JSON) to a field.Field instance.
 // It initializes the encoding, prefix, padding, and regex pattern components.
 // It returns a field.Field instance and an error if initialization fails.
-func SetField(f FieldDto) (*field.Field, error) {
+func SetField(f FieldDto) (field.Packager, error) {
 	length := f.Length
-	if f.Encoding == encoding.Binary || f.Encoding == encoding.Bcd {
+	if f.Encoding == encoding.Bcd {
 		length = length / 2
 	}
 
@@ -100,6 +107,10 @@ func SetField(f FieldDto) (*field.Field, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//if f.Type == field.Bitmap {
+	//	return field.NewBitmapField(f.Description, length, enc, true), nil
+	//}
 
 	pf, err := GetPrefixer(f.Prefix)
 	if err != nil {
@@ -116,15 +127,7 @@ func SetField(f FieldDto) (*field.Field, error) {
 		return nil, fmt.Errorf("invalid pattern for field %w", err)
 	}
 
-	return &field.Field{
-		Description: f.Description,
-		Type:        f.Type,
-		Length:      length,
-		Pattern:     re,
-		Encoding:    enc,
-		Prefix:      pf,
-		Padding:     pad,
-	}, nil
+	return field.NewField(f.Description, f.Type, length, re, enc, pf, pad), nil
 }
 
 // GetPrefixer creates a Prefixer instance based on the prefix.Prefix configuration.
