@@ -149,19 +149,21 @@ func (m *Message) Log() string {
 	jsonStr += ","
 
 	marshaledValue, _ = json.Marshal(v)
-	jsonStr += fmt.Sprintf(`"%d":%s`, 1, m.Bitmap2.ToString())
+	jsonStr += fmt.Sprintf(`"%d":"%s"`, 1, m.Bitmap2.ToString())
 	jsonStr += ","
 
 	for i, k := range m.Bitmap2.GetSliceString() {
-		v, err = m.GetField(k)
-		if err != nil {
-			return ""
-		}
+		if k != 0 && k != 1 {
+			v, err = m.GetField(k)
+			if err != nil {
+				return ""
+			}
 
-		marshaledValue, _ = json.Marshal(v)
-		jsonStr += fmt.Sprintf(`"%d":%s`, k, string(marshaledValue))
-		if i < len(m.Bitmap2.GetSliceString())-1 {
-			jsonStr += ","
+			marshaledValue, _ = json.Marshal(v)
+			jsonStr += fmt.Sprintf(`"%d":%s`, k, string(marshaledValue))
+			if i < len(m.Bitmap2.GetSliceString())-1 {
+				jsonStr += ","
+			}
 		}
 	}
 	jsonStr += "}"
