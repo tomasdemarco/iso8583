@@ -4,7 +4,7 @@ package packager
 
 import (
 	"encoding/json"
-	"errors"
+
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/packager/field"
@@ -48,18 +48,18 @@ func LoadFromJson(path, file string) (*Packager, error) {
 
 	jsonFile, err := os.Open(absPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrFailedToOpenFile, err)
 	}
 
 	byteValue, err := io.ReadAll(jsonFile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrFailedToReadFile, err)
 	}
 
 	var pkgDto PackagerDto
 	err = json.Unmarshal(byteValue, &pkgDto)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrFailedToUnmarshalJSON, err)
 	}
 	defer jsonFile.Close()
 
@@ -83,7 +83,7 @@ func LoadFromJson(path, file string) (*Packager, error) {
 
 		kNum, err := strconv.Atoi(k)
 		if err != nil {
-			return nil, fmt.Errorf("invalid field number: %s", k)
+			return nil, fmt.Errorf("%w: %w", ErrInvalidFieldNumber, err)
 		}
 
 		fields[kNum] = fld
@@ -124,7 +124,7 @@ func SetField(f FieldDto) (field.Packager, error) {
 
 	re, err := regexp.Compile(f.Pattern)
 	if err != nil {
-		return nil, fmt.Errorf("invalid pattern for field %w", err)
+		return nil, fmt.Errorf("%w: %w", ErrInvalidFieldPattern, err)
 	}
 
 	return field.NewField(f.Description, f.Type, length, re, enc, pf, pad), nil
@@ -161,7 +161,7 @@ func GetEncoder(enc encoding.Encoding, bcdPadLeft bool) (encoding.Encoder, error
 	case encoding.Ascii:
 		return &encoding.ASCII{}, nil
 	default:
-		return nil, errors.New("invalid encoding")
+		return nil, ErrInvalidEncoding
 	}
 }
 
@@ -176,7 +176,7 @@ func GetPadder(p padding.Padding) (padding.Padder, error) {
 		case padding.Right:
 			return padding.NewParityPadder(false, p.Char), nil
 		default:
-			return nil, errors.New("invalid padding")
+			return nil, ErrInvalidPadding
 		}
 	case padding.Fill:
 		switch p.Position {
@@ -185,7 +185,7 @@ func GetPadder(p padding.Padding) (padding.Padder, error) {
 		case padding.Right:
 			return padding.NewFillPadder(false, p.Char), nil
 		default:
-			return nil, errors.New("invalid padding")
+			return nil, ErrInvalidPadding
 		}
 	default:
 		return padding.NONE.NONE, nil

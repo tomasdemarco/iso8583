@@ -51,7 +51,7 @@ func (p *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid padding: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidPaddingType, j)
 }
 
 // IsValid checks if the Type is a valid padding type.

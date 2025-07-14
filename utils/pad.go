@@ -1,4 +1,3 @@
-// Package utils provides various utility functions used across the ISO 8583 library.
 package utils
 
 import "fmt"
@@ -8,11 +7,11 @@ import "fmt"
 func ZeroPadRight(data []byte, targetLength int) ([]byte, error) {
 	dataLen := len(data)
 	if dataLen > targetLength {
-		return nil, fmt.Errorf("invalid length: data length %d exceeds target length %d", dataLen, targetLength)
+		return nil, fmt.Errorf("%w: data length %d exceeds target length %d", ErrInvalidPadLength, dataLen, targetLength)
 	}
 
 	if dataLen == targetLength {
-		return data, nil
+		return data, nil // No padding needed
 	}
 
 	paddedData := make([]byte, targetLength)
@@ -26,7 +25,7 @@ func ZeroPadRight(data []byte, targetLength int) ([]byte, error) {
 func ZeroPadLeft(data []byte, targetLength int) ([]byte, error) {
 	dataLen := len(data)
 	if dataLen > targetLength {
-		return nil, fmt.Errorf("invalid length: data length %d exceeds target length %d", dataLen, targetLength)
+		return nil, fmt.Errorf("%w: data length %d exceeds target length %d", ErrInvalidPadLength, dataLen, targetLength)
 	}
 
 	if dataLen == targetLength {

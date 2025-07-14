@@ -2,7 +2,6 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -32,7 +31,7 @@ func (de59 *DE59) UnpackDe59(de59Raw string) (err error) {
 			codProduct := de59Raw[position : position+3]
 			qtySubProducts, err := strconv.Atoi(de59Raw[position+3 : position+7])
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %w", ErrDE59ParsingError, err)
 			}
 
 			position += 7
@@ -43,7 +42,7 @@ func (de59 *DE59) UnpackDe59(de59Raw string) (err error) {
 					lenSubProd := de59Raw[position : position+3]
 					lenSubProduct, err := strconv.Atoi(lenSubProd)
 					if err != nil {
-						return err
+						return fmt.Errorf("%w: %w", ErrDE59ParsingError, err)
 					}
 
 					position += 3
@@ -55,14 +54,14 @@ func (de59 *DE59) UnpackDe59(de59Raw string) (err error) {
 						if len(de59Raw) >= position+lenSubProduct {
 							subProducts[codSubProduct] = de59Raw[position : position+lenSubProduct]
 						} else {
-							return errors.New("error when parsing field 59")
+							return ErrDE59ParsingError
 						}
 						position += lenSubProduct
 					} else {
-						return errors.New("error when parsing field 59")
+						return ErrDE59ParsingError
 					}
 				} else {
-					return errors.New("error when parsing field 59")
+					return ErrDE59ParsingError
 				}
 			}
 			products[codProduct] = subProducts

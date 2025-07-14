@@ -52,15 +52,18 @@ func (p *BinaryPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 
 	lengthString, err := p.encoder.Decode(b[offset:])
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %w", ErrFailedToDecodeLength, err)
 	}
 
 	length, err := lenStrToInt(lengthString, p.hex)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %w", ErrInvalidLengthStringConversion, err)
 	}
 
-	if p.isInclusive && length >= p.nBytes {
+	if p.isInclusive {
+		if length < p.nBytes {
+			return 0, fmt.Errorf("%w: decoded length %d is less than prefix length %d", ErrInvalidLengthStringConversion, length, p.nBytes)
+		}
 		return length - p.nBytes, nil
 	}
 

@@ -38,13 +38,13 @@ var typeStrings = [...]string{
 }
 
 // String returns the string representation of a Type.
-func (t Type) String() string {
-	return typeStrings[t]
+func (t *Type) String() string {
+	return typeStrings[*t]
 }
 
 // EnumIndex returns the integer index of a Type.
-func (t Type) EnumIndex() int {
-	return int(t)
+func (t *Type) EnumIndex() int {
+	return int(*t)
 }
 
 // UnmarshalJSON overrides the default JSON unmarshaling for Type.
@@ -63,5 +63,16 @@ func (t *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid type prefix: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidPrefixType, j)
+}
+
+// IsValid checks if the Type is a valid prefix type.
+func (t *Type) IsValid() bool {
+	if int(*t) >= 0 && int(*t) < len(typeStrings) {
+		value := typeStrings[*t]
+		if value != "" {
+			return true
+		}
+	}
+	return false
 }

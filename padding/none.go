@@ -27,13 +27,3 @@ func (p *NonePadder) EncodePad(_ int, _ int, _ encoding.Encoder) (string, string
 func (p *NonePadder) DecodePad(_ int) (int, int) {
 	return 0, 0
 }
-
-// SetChar for NonePadder does nothing as no padding character is used.
-func (p *NonePadder) SetChar(char string) {
-	p.char = char
-}
-
-// GetChar for NonePadder returns an empty string as no padding character is used.
-func (p *NonePadder) GetChar() string {
-	return p.char
-}

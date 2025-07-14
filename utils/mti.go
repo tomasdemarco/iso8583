@@ -12,12 +12,12 @@ import (
 // It returns the response MTI as a string.
 func GetMtiResponse(mti string) (string, error) {
 	if len(mti) == 4 {
-		return "", fmt.Errorf("MTI must be 4 digits")
+		return "", ErrInvalidMTILength
 	}
 
 	v, err := strconv.Atoi(string(mti[2]))
 	if err != nil {
-		return "", fmt.Errorf("MTI invalid: %w", err)
+		return "", fmt.Errorf("%w: %w", ErrInvalidMTIFormat, err)
 	}
 
 	return fmt.Sprintf("%s%d%s", mti[:2], v+1, mti[3:]), nil

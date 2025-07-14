@@ -34,7 +34,7 @@ func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder enco
 		lengthPackager = lengthPackager * 2
 	}
 	if lengthPackager < lengthValue {
-		return "", "", fmt.Errorf("value %d too long, maximum %d", lengthValue, lengthPackager)
+		return "", "", fmt.Errorf("%w: value %d, max %d", ErrValueTooLong, lengthValue, lengthPackager)
 	}
 	if p.left {
 		return strings.Repeat(p.char, lengthPackager-lengthValue), "", nil
@@ -45,14 +45,4 @@ func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder enco
 // DecodePad for FillPadder always returns 0, 0 as fill padding is removed by simply slicing.
 func (p *FillPadder) DecodePad(_ int) (int, int) {
 	return 0, 0
-}
-
-// SetChar sets the padding character for the FillPadder.
-func (p *FillPadder) SetChar(char string) {
-	p.char = char
-}
-
-// GetChar returns the padding character used by the FillPadder.
-func (p *FillPadder) GetChar() string {
-	return p.char
 }

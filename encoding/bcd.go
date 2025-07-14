@@ -46,7 +46,7 @@ func (e *BCD) Encode(src string) ([]byte, error) {
 // It reads up to the configured length.
 func (e *BCD) Decode(src []byte) (string, error) {
 	if len(src) < e.length {
-		return "", fmt.Errorf("BCD decode: not enough data to read. expected %d, got %d", e.length, len(src))
+		return "", fmt.Errorf("%w: expected %d, got %d", ErrNotEnoughDataToDecode, e.length, len(src))
 	}
 
 	src = src[:e.length]

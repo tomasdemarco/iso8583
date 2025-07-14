@@ -48,7 +48,7 @@ func (p *Position) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid padding position: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidPaddingPosition, j)
 }
 
 // IsValid checks if the Position is a valid padding position.

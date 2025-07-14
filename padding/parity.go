@@ -50,13 +50,3 @@ func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
 	}
 	return 0, 1
 }
-
-// SetChar sets the padding character for the ParityPadder.
-func (p *ParityPadder) SetChar(char string) {
-	p.char = char
-}
-
-// GetChar returns the padding character used by the ParityPadder.
-func (p *ParityPadder) GetChar() string {
-	return p.char
-}

@@ -60,7 +60,7 @@ func (e *Encoding) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid encoding: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidEncodingType, j)
 }
 
 // IsValid checks if the Encoding is a valid encoding type.

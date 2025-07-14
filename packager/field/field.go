@@ -1,7 +1,6 @@
 package field
 
 import (
-	"errors"
 	"github.com/tomasdemarco/iso8583/encoding"
 	"github.com/tomasdemarco/iso8583/padding"
 	"github.com/tomasdemarco/iso8583/prefix"
@@ -86,7 +85,7 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 	f.Encoder().SetLength(length)
 
 	if len(messageRaw) < position+length {
-		return "", 0, errors.New("index out of range while trying to unpack")
+		return "", 0, ErrUnpackIndexOutOfRange
 	}
 
 	value, err := f.Encoder().Decode(messageRaw[position:])
@@ -97,7 +96,7 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 	value = value[paddingLeft : len(value)-paddingRight]
 
 	if !f.Pattern().MatchString(value) {
-		return "", 0, errors.New("invalid format")
+		return "", 0, ErrInvalidFieldFormat
 	}
 
 	return value, length + f.Prefixer().GetPackedLength(), nil

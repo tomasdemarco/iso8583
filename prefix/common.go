@@ -40,7 +40,7 @@ func validateMaxLimit(length, nDigits int, hex bool) error {
 	}
 
 	if length > maxLength {
-		return fmt.Errorf("length %d exceeds the maximum length of %d for the %d-digit prefix", length, maxLength, nDigits)
+		return fmt.Errorf("%w: length %d, max %d, digits %d", ErrLengthExceedsMaxLimit, length, maxLength, nDigits)
 	}
 
 	return nil
