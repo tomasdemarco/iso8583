@@ -21,7 +21,7 @@
 		"001": {
 			"description": "Secondary Bitmap",
 			"type": "BITMAP",
-			"length": 16,
+			"length": 8,
 			"pattern": "^[0-9a-fA-F]{16,32}$",
 			"encoding": "ASCII",
 			"prefix": null,

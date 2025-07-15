@@ -1,7 +1,6 @@
 package emv
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -12,10 +11,8 @@ func Unpack(value string, tags ...string) (map[string]string, error) {
 	var tagsValidate = make(map[string]string)
 
 	tagsFilter := map[string]string{}
-	if tags != nil {
-		for _, v := range tags {
-			tagsFilter[v] = v
-		}
+	for _, v := range tags {
+		tagsFilter[v] = v
 	}
 
 	position := 0
@@ -32,7 +29,7 @@ func Unpack(value string, tags ...string) (map[string]string, error) {
 
 		length, err := strconv.ParseInt(value[position:position+2], 16, 10)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", ErrInvalidTagLength, err)
 		}
 
 		if _, ok := tagsFilter[tag]; ok || tags == nil {
@@ -43,11 +40,9 @@ func Unpack(value string, tags ...string) (map[string]string, error) {
 		position += 2 + int(length*2)
 	}
 
-	if tags != nil {
-		for _, tag := range tags {
-			if _, ok := tagsValidate[tag]; !ok {
-				return nil, errors.New("does not contain the tag '" + tag + "'")
-			}
+	for _, tag := range tags {
+		if _, ok := tagsValidate[tag]; !ok {
+			return nil, fmt.Errorf("%w: '%s'", ErrTagNotFound, tag)
 		}
 	}
 

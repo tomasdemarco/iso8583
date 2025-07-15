@@ -1,0 +1,52 @@
+{
+  "description": "Test Packager",
+  "prefix": {
+    "type": "FIXED",
+    "length": 4,
+    "encoding": "BCD"
+  },
+  "fields": {
+    "000": {
+      "description": "Message Type Indicator",
+      "type": "NUMERIC",
+      "length": 4,
+      "pattern": "^[0-9]{4}$",
+      "encoding": "BCD"
+    },
+    "001": {
+      "description": "Bitmap",
+      "type": "BITMAP",
+      "length": 8,
+      "pattern": "^[0-9a-fA-F]{8,16}$",
+      "encoding": "BINARY"
+    },
+    "011": {
+      "description": "Systems Trace Audit Number (STAN)",
+      "type": "NUMERIC",
+      "length": 6,
+      "pattern": "^[0-9]{6}$",
+      "encoding": "BCD",
+      "padding": {
+        "type": "FILL",
+        "position": "LEFT",
+        "char": "0"
+      }
+    },
+    "032": {
+      "description": "Acquiring Institution Identification Code",
+      "type": "NUMERIC",
+      "length": 11,
+      "pattern": "^[0-9]{1,11}$",
+      "encoding": "BCD",
+      "prefix": {
+        "type": "LL",
+        "encoding": "BCD"
+      },
+      "padding": {
+        "type": "FILL",
+        "position": "LEFT",
+        "char": "0"
+      }
+    }
+  }
+}

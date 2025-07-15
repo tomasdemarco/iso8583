@@ -1,3 +1,4 @@
+// Package padding provides functionalities for handling padding in ISO 8583 fields.
 package padding
 
 import (
@@ -5,31 +6,37 @@ import (
 	"fmt"
 )
 
+// Type represents the type of padding to be applied to a field.
 type Type int
 
 const (
+	// None indicates no padding should be applied.
 	None Type = iota
+	// Fill indicates padding with a specific character.
 	Fill
+	// Parity indicates padding to achieve an even/odd length.
 	Parity
 )
 
+// paddingStrings maps Type constants to their string representations.
 var paddingStrings = [...]string{
 	None:   "NONE",
 	Fill:   "FILL",
 	Parity: "PARITY",
 }
 
-// String return string
+// String returns the string representation of a Type.
 func (p *Type) String() string {
 	return paddingStrings[*p]
 }
 
-// EnumIndex return index
+// EnumIndex returns the integer index of a Type.
 func (p *Type) EnumIndex() int {
 	return int(*p)
 }
 
-// UnmarshalJSON override default unmarshal json
+// UnmarshalJSON overrides the default JSON unmarshaling for Type.
+// It allows deserializing Type from its string representation.
 func (p *Type) UnmarshalJSON(b []byte) error {
 	var j string
 	err := json.Unmarshal(b, &j)
@@ -44,9 +51,10 @@ func (p *Type) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid padding: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidPaddingType, j)
 }
 
+// IsValid checks if the Type is a valid padding type.
 func (p *Type) IsValid() bool {
 	if int(*p) >= 0 && int(*p) < len(paddingStrings) {
 		value := paddingStrings[*p]

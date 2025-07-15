@@ -20,7 +20,7 @@ func Unpack(r *bufio.Reader, prefixer prefix.Prefixer) (int, error) {
 	_, err := io.ReadFull(r, buf)
 	if err != nil {
 		if err != io.EOF {
-			err = fmt.Errorf("reading length: %w", err)
+			err = fmt.Errorf("%w: %w", ErrReadingLength, err)
 		}
 
 		return 0, err

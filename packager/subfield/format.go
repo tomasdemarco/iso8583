@@ -44,5 +44,5 @@ func (f *Format) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	return fmt.Errorf("invalid format subfield: %s", j)
+	return fmt.Errorf("%w: %s", ErrInvalidSubfieldFormat, j)
 }
