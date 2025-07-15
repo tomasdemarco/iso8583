@@ -4,6 +4,7 @@ package packager
 
 import (
 	"encoding/json"
+	"errors"
 
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
@@ -61,7 +62,13 @@ func LoadFromJson(path, file string) (*Packager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrFailedToUnmarshalJSON, err)
 	}
-	defer jsonFile.Close()
+
+	defer func(jsonFile *os.File) {
+		cErr := jsonFile.Close()
+		if cErr != nil {
+			err = errors.Join(err, fmt.Errorf("%w: %w", ErrFailedToCloseFile, cErr))
+		}
+	}(jsonFile)
 
 	var pkg Packager
 
