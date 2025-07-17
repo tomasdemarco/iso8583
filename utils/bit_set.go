@@ -18,12 +18,11 @@ func NewBitSet(numBits int, maxSize int) *BitSet {
 	if numBits < 0 {
 		numBits = 0
 	}
-	if maxSize <= 0 { // Default to numBits if maxSize is not explicitly set or is invalid
+
+	if maxSize <= 0 || maxSize < numBits { // Default to numBits if maxSize is not explicitly set or is invalid
 		maxSize = numBits
 	}
-	if maxSize < numBits {
-		maxSize = numBits // maxSize no puede ser menor que el tamaño inicial
-	}
+
 	numBytes := (numBits + 7) / 8 // Calcular el número de bytes necesarios
 	return &BitSet{
 		bytes:   make([]byte, numBytes),
@@ -42,9 +41,9 @@ func (bs *BitSet) Set(idx int) {
 
 	// Auto-expandir si el índice está fuera de los límites actuales
 	if idx > bs.size {
-		// Calcular el nuevo tamaño en bits (siguiente múltiplo de 8 bits)
-		// Ajustar idx a 0-basado para el cálculo del bloque de 8 bits
-		newSize := (((idx - 1) / 8) + 1) * 8
+		numBytes := ((idx + 1) + bs.size - 1) / bs.size
+
+		newSize := numBytes * bs.size
 
 		// Asegurarse de que el nuevo tamaño no exceda el maxSize
 		if newSize > bs.maxSize {
@@ -69,7 +68,7 @@ func (bs *BitSet) Set(idx int) {
 	internalIdx := idx - 1
 	byteIndex := internalIdx / 8
 	bitInBytePos := uint(internalIdx % 8)
-	bs.bytes[byteIndex] |= (1 << (7 - bitInBytePos)) // Orden de bits Big-Endian dentro del byte
+	bs.bytes[byteIndex] |= 1 << (7 - bitInBytePos) // Orden de bits Big-Endian dentro del byte
 }
 
 // Get comprueba si un bit en una posición específica está activado (basada en 1).

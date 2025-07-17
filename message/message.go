@@ -142,7 +142,7 @@ func (m *Message) packMti() ([]byte, error) {
 func (m *Message) packBitmap() ([]byte, error) {
 	if fldPKg, ok := m.Packager.Fields[1]; ok {
 
-		if len(m.Bitmap.ToBytes()) > 8 {
+		if len(m.Bitmap.ToBytes()) > fldPKg.Length() {
 			m.SetField(1, fmt.Sprintf("%X", m.Bitmap.ToBytes()))
 		}
 

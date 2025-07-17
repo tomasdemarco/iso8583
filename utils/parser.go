@@ -40,7 +40,8 @@ func Bin2Hex(s string) string {
 // bitZeroExtended: si el bit 0 indica la presencia de un segundo bitmap.
 func Byte2BitSet(b []byte) (*BitSet, error) {
 
-	bitmap := NewBitSet(len(b)*8, 128)
+	size := len(b) * 8
+	bitmap := NewBitSet(size, size*2)
 
 	copy(bitmap.bytes, b)
 
