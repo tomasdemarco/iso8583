@@ -14,6 +14,8 @@ type Padder interface {
 	// of a padded field value based on its total length (lengthField).
 	// It returns the count of characters to remove from the left and right.
 	DecodePad(lengthField int) (int, int)
+
+	Type() Type
 }
 
 // Padders is a collection of common Padder implementations.
