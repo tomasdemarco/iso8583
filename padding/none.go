@@ -27,3 +27,7 @@ func (p *NonePadder) EncodePad(_ int, _ int, _ encoding.Encoder) (string, string
 func (p *NonePadder) DecodePad(_ int) (int, int) {
 	return 0, 0
 }
+
+func (p *NonePadder) Type() Type {
+	return None
+}

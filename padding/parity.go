@@ -50,3 +50,7 @@ func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
 	}
 	return 0, 1
 }
+
+func (p *ParityPadder) Type() Type {
+	return Parity
+}

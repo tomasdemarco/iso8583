@@ -46,3 +46,7 @@ func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder enco
 func (p *FillPadder) DecodePad(_ int) (int, int) {
 	return 0, 0
 }
+
+func (p *FillPadder) Type() Type {
+	return Fill
+}
