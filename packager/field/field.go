@@ -123,7 +123,7 @@ func (f Field) Pack(value string) ([]byte, string, error) {
 	if _, ok := f.Encoder().(*encoding.BCD); ok {
 		length = length * 2
 
-		if f.Padder().Type() == padding.Parity {
+		if f.Padder().Type() == padding.Parity && len(padLeft+padRight) > 0 {
 			length -= 1
 		}
 	}
