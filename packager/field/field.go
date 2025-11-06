@@ -72,15 +72,21 @@ func (f Field) Unpack(messageRaw []byte, position int) (string, int, error) {
 		length = f.Length()
 	} else {
 		position += f.Prefixer().GetPackedLength()
-
-		if _, ok := f.Encoder().(*encoding.BCD); ok {
-			length = length / 2
-		}
 	}
 
 	paddingLeft, paddingRight := f.Padder().DecodePad(length)
 
 	length += paddingLeft + paddingRight
+
+	if _, ok := f.Prefixer().(*prefix.NonePrefixer); !ok {
+		if _, ok = f.Encoder().(*encoding.BCD); ok {
+			if length%2 != 0 {
+				length++
+			}
+
+			length = length / 2
+		}
+	}
 
 	f.Encoder().SetLength(length)
 
