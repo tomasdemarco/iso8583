@@ -3,14 +3,14 @@
 package packager
 
 import (
-	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/prefix"
 )
 
 // Packager represents the definition of an ISO 8583 message format.
 // It contains a description, the message prefix, and a map of fields.
 type Packager struct {
-	Description string                 `json:"description"`
-	Prefix      prefix.Prefixer        `json:"prefix"`
-	Fields      map[int]field.Packager `json:"fields"`
+	Description string
+	Prefix      prefix.Prefixer
+	Header      HeaderPackager
+	Fields      map[int]FieldPackager
 }

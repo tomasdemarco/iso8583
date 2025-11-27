@@ -17,7 +17,7 @@
       "description": "Bitmap",
       "type": "BITMAP",
       "length": 8,
-      "pattern": "^[0-9a-fA-F]{8,16}$",
+      "pattern": "^[0-9a-fA-F]{16}$",
       "encoding": "BINARY"
     },
     "011": {

@@ -2,13 +2,13 @@ package bitmap
 
 import (
 	"fmt"
-	"github.com/tomasdemarco/iso8583/packager/field"
+	"github.com/tomasdemarco/iso8583/packager"
 	"github.com/tomasdemarco/iso8583/utils"
 )
 
 // Unpack decodes a bitmap byte slice into a slice of field numbers (strings).
 // It determines if a primary (8 bytes) or secondary (16 bytes) bitmap is present.
-func Unpack(field field.Packager, b []byte, offset int) (*utils.BitSet, int, error) {
+func Unpack(field packager.FieldPackager, b []byte, offset int) (*utils.BitSet, int, error) {
 
 	bitmapVal, length, err := field.Unpack(b, offset)
 	if err != nil {
