@@ -11,4 +11,6 @@ var (
 	ErrInvalidEncoding       = errors.New("invalid encoding type")
 	ErrInvalidPadding        = errors.New("invalid padding type")
 	ErrInvalidFieldPattern   = errors.New("invalid field pattern")
+	ErrUnpackIndexOutOfRange = errors.New("index out of range while trying to unpack")
+	ErrInvalidFieldFormat    = errors.New("invalid field format")
 )

@@ -21,9 +21,9 @@
 		"001": {
 			"description": "Secondary Bitmap",
 			"type": "BITMAP",
-			"length": 16,
+			"length": 8,
 			"pattern": "^[0-9a-fA-F]{16,32}$",
-			"encoding": "BCD",
+			"encoding": "BINARY",
 			"prefix":  null,
 			"padding": null,
 			"subFieldsData": null
@@ -421,6 +421,16 @@
 				"type": "LLL",
 				"encoding": "BCD"
 			},
+			"padding": null,
+			"subFieldsData": null
+		},
+		"126": {
+			"description": "Test Bytes Field",
+			"type": "BINARY",
+			"length": 3,
+			"pattern": "^[0-9a-fA-F]{6}$",
+			"encoding": "BINARY",
+			"prefix":  null,
 			"padding": null,
 			"subFieldsData": null
 		}

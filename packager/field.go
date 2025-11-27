@@ -1,4 +1,4 @@
-package field
+package packager
 
 import (
 	"github.com/tomasdemarco/iso8583/encoding"
@@ -8,7 +8,7 @@ import (
 	"regexp"
 )
 
-type Packager interface {
+type FieldPackager interface {
 	Pack(value string) ([]byte, string, error)
 	Unpack(messageRaw []byte, position int) (string, int, error)
 	Length() int
@@ -18,13 +18,14 @@ type Packager interface {
 	Padder() padding.Padder
 	Bitmap() *utils.BitSet
 	SetBitmap(bmap *utils.BitSet)
+	GetType() FieldType
 }
 
 // Field represents an ISO 8583 field's definition, including its data type,
 // length, validation pattern, encoding, prefix, and padding rules.
 type Field struct {
 	Description string
-	Type        Type
+	Type        FieldType
 	length      int
 	pattern     *regexp.Regexp
 	encoder     encoding.Encoder
@@ -34,13 +35,13 @@ type Field struct {
 
 func NewField(
 	description string,
-	fieldType Type,
+	fieldType FieldType,
 	length int,
 	pattern *regexp.Regexp,
 	encoding encoding.Encoder,
 	prefix prefix.Prefixer,
 	padding padding.Padder,
-) Packager {
+) FieldPackager {
 	return &Field{
 		Description: description,
 		Type:        fieldType,
@@ -167,4 +168,8 @@ func (f Field) Bitmap() *utils.BitSet {
 }
 
 func (f Field) SetBitmap(*utils.BitSet) {
+}
+
+func (f Field) GetType() FieldType {
+	return f.Type
 }

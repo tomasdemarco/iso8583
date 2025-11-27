@@ -8,7 +8,6 @@ import (
 
 	"fmt"
 	"github.com/tomasdemarco/iso8583/encoding"
-	"github.com/tomasdemarco/iso8583/packager/field"
 	"github.com/tomasdemarco/iso8583/padding"
 	"github.com/tomasdemarco/iso8583/prefix"
 	"io"
@@ -30,7 +29,7 @@ type PackagerDto struct {
 // It is used to deserialize the field configuration.
 type FieldDto struct {
 	Description string            `json:"description"`
-	Type        field.Type        `json:"type"`
+	Type        FieldType         `json:"type"`
 	Length      int               `json:"length"`
 	Pattern     string            `json:"pattern"`
 	Encoding    encoding.Encoding `json:"encoding"` // Encoding type (ASCII, BCD, etc.)
@@ -80,12 +79,12 @@ func LoadFromJson(path, file string) (*Packager, error) {
 
 	pkg.Prefix = pf
 
-	fields := make(map[int]field.Packager)
+	fields := make(map[int]FieldPackager)
 
 	for k, v := range pkgDto.Fields {
-		fld, err := SetField(v)
+		fld, err := createFieldFromDto(v) // Usar la nueva función
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("field %s: %w", k, err)
 		}
 
 		kNum, err := strconv.Atoi(k)
@@ -101,40 +100,37 @@ func LoadFromJson(path, file string) (*Packager, error) {
 	return &pkg, err
 }
 
-// SetField converts a FieldDto (from JSON) to a field.Field instance.
-// It initializes the encoding, prefix, padding, and regex pattern components.
-// It returns a field.Field instance and an error if initialization fails.
-func SetField(f FieldDto) (field.Packager, error) {
-	length := f.Length
-	if f.Encoding == encoding.Bcd {
+// createFieldFromDto es la función que crea un field.Packager
+// a partir de un FieldDto.
+func createFieldFromDto(dto FieldDto) (FieldPackager, error) {
+	// Para campos regulares
+	length := dto.Length
+	if dto.Encoding == encoding.Bcd {
 		length = length / 2
 	}
 
-	enc, err := GetEncoder(f.Encoding, bcdPadLeft(f.Padding))
+	enc, err := GetEncoder(dto.Encoding, bcdPadLeft(dto.Padding))
 	if err != nil {
 		return nil, err
 	}
 
-	//if f.Type == field.Bitmap {
-	//	return field.NewBitmapField(f.Description, length, enc, true), nil
-	//}
-
-	pf, err := GetPrefixer(f.Prefix)
+	pf, err := GetPrefixer(dto.Prefix)
 	if err != nil {
 		return nil, err
 	}
 
-	pad, err := GetPadder(f.Padding)
+	pad, err := GetPadder(dto.Padding)
 	if err != nil {
 		return nil, err
 	}
 
-	re, err := regexp.Compile(f.Pattern)
+	re, err := regexp.Compile(dto.Pattern)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidFieldPattern, err)
 	}
 
-	return field.NewField(f.Description, f.Type, length, re, enc, pf, pad), nil
+	fld := NewField(dto.Description, dto.Type, length, re, enc, pf, pad)
+	return fld, nil
 }
 
 // GetPrefixer creates a Prefixer instance based on the prefix.Prefix configuration.
