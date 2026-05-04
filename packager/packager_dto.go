@@ -129,7 +129,14 @@ func createFieldFromDto(dto FieldDto) (FieldPackager, error) {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidFieldPattern, err)
 	}
 
-	fld := NewField(dto.Description, dto.Type, length, re, enc, pf, pad)
+	fld := NewField(
+		dto.Description,
+		length,
+		enc,
+		WithFieldType(dto.Type),
+		WithPattern(re),
+		WithPrefix(pf),
+		WithPadding(pad))
 	return fld, nil
 }
 
@@ -146,7 +153,7 @@ func GetPrefixer(pf prefix.Prefix) (prefix.Prefixer, error) {
 	case encoding.Ascii:
 		return prefix.NewAsciiPrefixer(pf.Type.EnumIndex(), pf.Hex, pf.IsInclusive), nil
 	default:
-		return prefix.NONE.FIXED, nil
+		return nil, nil
 	}
 }
 
@@ -158,11 +165,11 @@ func GetEncoder(enc encoding.Encoding, bcdPadLeft bool) (encoding.Encoder, error
 	case encoding.Bcd:
 		return encoding.NewBcdEncoder(bcdPadLeft), nil
 	case encoding.Ebcdic:
-		return &encoding.EBCDIC{}, nil
+		return &encoding.EBCDIC, nil
 	case encoding.Binary:
-		return &encoding.BINARY{}, nil
+		return &encoding.BINARY, nil
 	case encoding.Ascii:
-		return &encoding.ASCII{}, nil
+		return &encoding.ASCII, nil
 	default:
 		return nil, ErrInvalidEncoding
 	}
@@ -191,7 +198,7 @@ func GetPadder(p padding.Padding) (padding.Padder, error) {
 			return nil, ErrInvalidPadding
 		}
 	default:
-		return padding.NONE.NONE, nil
+		return nil, nil
 	}
 }
 

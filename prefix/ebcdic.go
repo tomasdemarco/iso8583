@@ -17,19 +17,19 @@ type EbcdicPrefixer struct {
 
 // EBCDIC provides pre-configured EbcdicPrefixer instances for common length types.
 var EBCDIC = Prefixers{
-	L:      &EbcdicPrefixer{1, &encoding.EBCDIC{}, false, false},
-	LL:     &EbcdicPrefixer{2, &encoding.EBCDIC{}, false, false},
-	LLL:    &EbcdicPrefixer{3, &encoding.EBCDIC{}, false, false},
-	LLLL:   &EbcdicPrefixer{4, &encoding.EBCDIC{}, false, false},
-	LLLLL:  &EbcdicPrefixer{5, &encoding.EBCDIC{}, false, false},
-	LLLLLL: &EbcdicPrefixer{6, &encoding.EBCDIC{}, false, false},
+	L:      &EbcdicPrefixer{1, &encoding.EBCDIC, false, false},
+	LL:     &EbcdicPrefixer{2, &encoding.EBCDIC, false, false},
+	LLL:    &EbcdicPrefixer{3, &encoding.EBCDIC, false, false},
+	LLLL:   &EbcdicPrefixer{4, &encoding.EBCDIC, false, false},
+	LLLLL:  &EbcdicPrefixer{5, &encoding.EBCDIC, false, false},
+	LLLLLL: &EbcdicPrefixer{6, &encoding.EBCDIC, false, false},
 }
 
 // NewEbcdicPrefixer creates a new EbcdicPrefixer with the specified number of digits.
 // The `hex` parameter indicates if the length should be treated as hexadecimal.
 // The `isInclusive` parameter indicates if the encoded length includes the prefix's own length.
 func NewEbcdicPrefixer(nDigits int, hex, isInclusive bool) Prefixer {
-	return &EbcdicPrefixer{nDigits, &encoding.EBCDIC{}, hex, isInclusive}
+	return &EbcdicPrefixer{nDigits, &encoding.EBCDIC, hex, isInclusive}
 }
 
 // EncodeLength encodes the given integer length into an EBCDIC byte slice.
@@ -78,4 +78,12 @@ func (p *EbcdicPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 // GetPackedLength returns the number of EBCDIC digits used to encode the length.
 func (p *EbcdicPrefixer) GetPackedLength() int {
 	return p.nDigits
+}
+
+func (p *EbcdicPrefixer) IsHex() {
+	p.hex = true
+}
+
+func (p *EbcdicPrefixer) IsInclusive() {
+	p.isInclusive = true
 }

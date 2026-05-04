@@ -7,7 +7,7 @@ import (
 // TestLoadFromJson calls message.UnpackPadding
 func TestLoadFromJson(t *testing.T) {
 	fileName := "iso87BPackager.json"
-	_, err := LoadFromJson("./", "iso87BPackager.json")
+	_, err := LoadFromJson("./json_examples/", "iso87BPackager.json")
 	if err != nil {
 		t.Fatalf(`TestLoadFromJson - error loading packager "%s": %v`, fileName, err)
 	}
@@ -16,7 +16,7 @@ func TestLoadFromJson(t *testing.T) {
 
 	fileName = "iso93EAmexPackager.json"
 
-	_, err = LoadFromJson("./", fileName)
+	_, err = LoadFromJson("./json_examples/", fileName)
 	if err != nil {
 		t.Fatalf(`TestLoadFromJson - error loading packager "%s": %v`, fileName, err)
 	}

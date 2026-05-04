@@ -4,9 +4,11 @@ package message
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/tomasdemarco/iso8583/bitmap"
+	"github.com/tomasdemarco/iso8583/field"
 	"github.com/tomasdemarco/iso8583/header"
 	"github.com/tomasdemarco/iso8583/packager"
 	"github.com/tomasdemarco/iso8583/utils"
@@ -22,153 +24,107 @@ type Message struct {
 	Header   header.Header
 	Trailer  interface{}
 	Bitmap   *utils.BitSet
-	fields   map[int]Field // Cambiado a minúscula para ser interno
-	// Almacena funciones de fábrica para StructField, permitiendo la creación dinámica.
-	registeredStructFields map[int]func() Field
-	TagsEmv                map[string]string
+	fields   map[int]field.Field
 }
 
 // NewMessage creates and returns a new Message instance
 // initialized with the provided packager.
-func NewMessage(packager *packager.Packager) *Message {
+func NewMessage(p *packager.Packager) *Message {
 	return &Message{
-		Packager:               packager,
-		Bitmap:                 utils.NewBitSet(64, 128),
-		fields:                 make(map[int]Field),
-		registeredStructFields: make(map[int]func() Field),
+		Packager: p,
+		Bitmap:   utils.NewBitSet(64, 128),
+		fields:   make(map[int]field.Field),
 	}
 }
 
 // SetField sets the value of a specific field in the message.
-func (m *Message) SetField(id int, v any) {
+func (m *Message) SetField(id int, v any) error {
 	f, ok := m.fields[id]
 	if !ok {
 		f = m.createField(id)
-	}
-
-	f.Set(v)
-	m.fields[id] = f
-	m.Bitmap.Set(id)
-}
-
-// GetField retrieves the internal Field object for a given ID.
-// This is primarily for internal use or advanced scenarios.
-func (m *Message) GetField(id int) (Field, bool) {
-	f, ok := m.fields[id]
-	return f, ok
-}
-
-func (m *Message) Field(id int) *FieldAccessor {
-	f, ok := m.fields[id] // Asumiendo que m.fields es tu mapa interno
-	if !ok {
-		return &FieldAccessor{
-			err: fmt.Errorf("campo %d: %w", id, ErrNotFoundInMessage),
-		}
-	}
-	return &FieldAccessor{field: f}
-}
-
-// String retrieves the value of a field as a string.
-func (m *Message) String(id int) (string, error) {
-	f, ok := m.GetField(id)
-	if !ok {
-		return "", fmt.Errorf("campo %d: %w", id, ErrNotFoundInMessage)
-	}
-	if sf, ok := f.Get().(*StringField); ok {
-		return sf.Get().(string), nil
-	}
-	return "", fmt.Errorf("campo %d no es de tipo StringField", id)
-}
-
-// Int retrieves the value of a field as an int.
-func (m *Message) Int(id int) (int, error) {
-	f, ok := m.GetField(id)
-	if !ok {
-		return 0, fmt.Errorf("campo %d: %w", id, ErrNotFoundInMessage)
-	}
-	if ifld, ok := f.Get().(*IntField); ok {
-		return ifld.Get().(int), nil
-	}
-	return 0, fmt.Errorf("campo %d no es de tipo IntField", id)
-}
-
-// Bytes retrieves the value of a field as a byte slice.
-func (m *Message) Bytes(id int) ([]byte, error) {
-	f, ok := m.GetField(id)
-	if !ok {
-		return nil, fmt.Errorf("campo %d: %w", id, ErrNotFoundInMessage)
-	}
-	if bf, ok := f.Get().(*BytesField); ok {
-		return bf.Get().([]byte), nil
-	}
-	return nil, fmt.Errorf("campo %d no es de tipo BytesField", id)
-}
-
-// GetStruct retrieves the value of a field as a custom struct.
-// T must be the struct type (e.g., CustomerInfo).
-func GetStruct[T any](m *Message, id int) (T, error) {
-	var result T // result es un valor cero del tipo T
-
-	f, ok := m.GetField(id)
-	if !ok {
-		return result, fmt.Errorf("campo %d: %w", id, ErrNotFoundInMessage)
-	}
-
-	// Intentamos hacer un type assertion a *StructField[T]
-	if sf, ok := f.Get().(*StructField[T]); ok {
-		return sf.Get().(T), nil
-	}
-
-	return result, fmt.Errorf("campo %d no es de tipo StructField[%T]", id, result)
-}
-
-// RegisterField permite registrar manualmente una implementación de Field para un ID.
-func (m *Message) RegisterField(id int, f Field) {
-	m.fields[id] = f
-}
-
-// RegisterStructField registra un tipo de struct personalizado para un ID de campo.
-// Esto permite que el mensaje sepa cómo crear e instanciar StructField[T]
-// cuando se necesite para ese campo.
-func RegisterStructField[T any](m *Message, id int) {
-	m.registeredStructFields[id] = func() Field {
-		return &StructField[T]{}
-	}
-}
-
-// createField es una función interna para instanciar el tipo de Field correcto
-// basado en la configuración del packager o en los tipos registrados.
-func (m *Message) createField(id int) Field {
-	if factory, ok := m.registeredStructFields[id]; ok {
-		f := factory()
 		m.fields[id] = f
-		return f
 	}
 
-	var f Field
-	f = &StringField{}
-	fieldSpec, ok := m.Packager.Fields[id]
-	if ok {
-		switch fieldSpec.GetType() {
-		case packager.Numeric:
-			// Usamos StringField para NUMERIC por defecto para preservar ceros iniciales
-			f = &StringField{}
-		case packager.String: // Usar pkgfield.String para Alpha y AlphaNumeric
-			f = &StringField{}
-		case packager.Binary, packager.Bitmap:
-			f = &BytesField{}
-		default:
-			f = &StringField{}
-		}
+	if err := f.Set(v); err != nil {
+		return fmt.Errorf("failed to set field %d: %w", id, err)
+	}
+	m.Bitmap.Set(id)
+	return nil
+}
+
+func (m *Message) SetFieldString(id int, value string) error {
+	return m.SetField(id, value)
+}
+
+func (m *Message) SetFieldInt(id int, value int) error {
+	return m.SetField(id, value)
+}
+
+func (m *Message) SetFieldBytes(id int, value []byte) error {
+	return m.SetField(id, value)
+}
+
+func (m *Message) GetField(id int) (v any, err error) {
+	f, ok := m.fields[id]
+	if !ok {
+		return nil, fmt.Errorf("field %d not found", id)
 	}
 
-	m.fields[id] = f
-	return f
+	return f.Get(), nil
+}
+
+func (m *Message) GetFieldString(id int) (string, error) {
+	f, ok := m.fields[id]
+	if !ok {
+		return "", fmt.Errorf("field %d not found", id)
+	}
+
+	if val, ok := f.(*field.String); ok {
+		return val.Get().(string), nil
+	}
+
+	return "", fmt.Errorf("field %d is not a string field, it is %T", id, f)
+}
+
+func (m *Message) GetFieldInt(id int) (int, error) {
+	f, ok := m.fields[id]
+	if !ok {
+		return 0, fmt.Errorf("field %d not found", id)
+	}
+
+	if val, ok := f.(*field.Int); ok {
+		return val.Get().(int), nil
+	}
+
+	return 0, fmt.Errorf("field %d is not an int field, it is %T", id, f)
+}
+
+func (m *Message) GetFieldBytes(id int) ([]byte, error) {
+	f, ok := m.fields[id]
+	if !ok {
+		return nil, fmt.Errorf("field %d not found", id)
+	}
+
+	if val, ok := f.(*field.Bytes); ok {
+		return val.Get().([]byte), nil
+	}
+
+	return nil, fmt.Errorf("field %d is not a byte field, it is %T", id, f)
+}
+
+// createField is an internal function to instantiate the correct Field type
+// based on the packager configuration.
+func (m *Message) createField(id int) field.Field {
+	if fieldSpec, ok := m.Packager.Fields[id]; ok {
+		return fieldSpec.NewDataField()
+	}
+	// Default to a string field if no spec is found.
+	// This could be made stricter if desired.
+	return &field.String{}
 }
 
 // Unpack unpacks a byte slice of an ISO 8583 message
 // into the Message structure, populating its fields.
-// It returns an error if unpacking fails.
 func (m *Message) Unpack(messageRaw []byte) (err error) {
 	lengthMti, err := m.unpackMti(messageRaw)
 	if err != nil {
@@ -181,15 +137,13 @@ func (m *Message) Unpack(messageRaw []byte) (err error) {
 	}
 
 	err = m.unpackFields(messageRaw, lengthMti+lengthBitmap)
-
 	return err
 }
 
 // Pack packs the message fields into an ISO 8583 byte slice.
-// It calculates the bitmap and encodes each field according to the packager's configuration.
-// It returns the packed message as a byte slice, and an error if packing fails.
 func (m *Message) Pack() ([]byte, error) {
 	msgPacked := new(bytes.Buffer)
+
 	encodeField, err := m.packMti()
 	if err != nil {
 		return nil, err
@@ -211,29 +165,16 @@ func (m *Message) Pack() ([]byte, error) {
 	return msgPacked.Bytes(), nil
 }
 
-func (m *Message) Log() string {
+func (m *Message) LogMsg() string {
 	fieldsToLog := make(map[string]interface{})
-
-	// Incluir MTI (campo 0) si está presente
-	if field, ok := m.fields[0]; ok {
-		fieldsToLog["0"] = field.Get()
-	}
-
-	// Incluir Bitmap (campo 1) si está presente
-	if field, ok := m.fields[1]; ok {
-		fieldsToLog["1"], _ = field.String()
-	}
 
 	if m.Bitmap != nil {
 		for _, id := range m.Bitmap.GetSliceString() {
-			// Los campos 0 y 1 ya se manejan explícitamente
-			if id != 0 && id != 1 {
-				if field, ok := m.fields[id]; ok {
-					var err error
-					fieldsToLog[strconv.Itoa(id)], err = field.Log()
-					if err != nil {
-						log.Println(err) //TODO ver si devolver el error
-					}
+			if f, ok := m.fields[id]; ok {
+				var err error
+				fieldsToLog[strconv.Itoa(id)], err = f.Log()
+				if err != nil {
+					log.Printf("error logging field %d: %v", id, err)
 				}
 			}
 		}
@@ -241,39 +182,44 @@ func (m *Message) Log() string {
 
 	jsonBytes, err := json.Marshal(fieldsToLog)
 	if err != nil {
-		return fmt.Sprintf("{\"error\": \"no se pudo convertir el log a JSON: %v\"}", err)
+		return fmt.Sprintf("{\"error\": \"failed to convert log to JSON: %v\"}", err)
 	}
 
 	return string(jsonBytes)
 }
 
 func (m *Message) packMti() ([]byte, error) {
-	if fldPKg, ok := m.Packager.Fields[0]; ok {
-		fld, err := m.Field(0).String()
-		if err != nil {
-			return nil, fmt.Errorf("pack mti: %w", err)
-		}
-
-		encodeField, _, err := fldPKg.Pack(fld)
-		if err != nil {
-			return nil, fmt.Errorf("pack mti: %w", err)
-		}
-
-		return encodeField, nil
+	fldPkg, ok := m.Packager.Fields[0]
+	if !ok {
+		return nil, nil
+		return nil, ErrMTINotFoundInPackager
 	}
 
-	return nil, ErrMTINotFoundInPackager
+	fld, err := m.GetFieldString(0)
+	if err != nil {
+		return nil, fmt.Errorf("pack mti: %w", err)
+	}
+
+	encodeField, _, err := fldPkg.Pack(fld)
+	if err != nil {
+		return nil, fmt.Errorf("pack mti: %w", err)
+	}
+
+	return encodeField, nil
 }
 
 func (m *Message) packBitmap() ([]byte, error) {
-	if fldPKg, ok := m.Packager.Fields[1]; ok {
+	if m.Packager.Bitmap != nil {
 		// El bitmap se maneja como BytesField, su String() devuelve hex
-		if len(m.Bitmap.ToBytes()) > fldPKg.Length() {
+		if len(m.Bitmap.ToBytes()) > m.Packager.Bitmap.Length() {
 			// Si el bitmap es secundario, SetField(1, ...) lo actualizará
-			m.SetField(1, m.Bitmap.ToBytes())
+			err := m.SetField(1, m.Bitmap.ToBytes()[m.Packager.Bitmap.Length():])
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		encodeField, _, errPack := fldPKg.Pack(m.Bitmap.ToString())
+		encodeField, _, errPack := m.Packager.Bitmap.Pack(m.Bitmap.ToString())
 		if errPack != nil {
 			return nil, fmt.Errorf("pack bitmap: %w", errPack)
 		}
@@ -287,49 +233,50 @@ func (m *Message) packFields() ([]byte, error) {
 	fieldsPacked := new(bytes.Buffer)
 
 	for _, k := range m.Bitmap.GetSliceString() {
-		if k != 0 && k != 1 { // MTI y Bitmap ya empaquetados
-			if fldPkg, ok := m.Packager.Fields[k]; ok {
-				fld, err := m.Field(k).String()
-				if err != nil {
-					return nil, fmt.Errorf("pack field %d: %w", k, err)
-				}
-				encodeField, _, errPack := fldPkg.Pack(fld)
-				if errPack != nil {
-					return nil, fmt.Errorf("pack field %d: %w", k, errPack)
-				}
-
-				// Actualizamos el campo con la versión "plain" si el packager la modifica (ej. padding)
-				// m.SetField(k, plainField) // Esto podría ser problemático si plainField no es el tipo original
-				fieldsPacked.Write(encodeField)
-			} else {
-				return nil, fmt.Errorf("field %d: %w", k, ErrNotFoundInPackager)
-			}
+		if k == 0 || k == 1 {
+			continue
 		}
+
+		fldPkg, ok := m.Packager.Fields[k]
+		if !ok {
+			return nil, fmt.Errorf("field %d: %w", k, ErrNotFoundInPackager)
+		}
+
+		fld, ok := m.fields[k]
+		if !ok {
+			return nil, fmt.Errorf("field %d not set in message", k)
+		}
+
+		fldStr, err := fld.Parse()
+		if err != nil {
+			return nil, fmt.Errorf("pack field %d: could not get string value: %w", k, err)
+		}
+
+		encodedField, _, errPack := fldPkg.Pack(fldStr)
+		if errPack != nil {
+			return nil, fmt.Errorf("pack field %d: %w", k, errPack)
+		}
+		fieldsPacked.Write(encodedField)
 	}
 
 	return fieldsPacked.Bytes(), nil
 }
 
-// unpackMti unpacks the Message FieldType Indicator (MTI) from the message.
-// This is an internal helper method.
 func (m *Message) unpackMti(messageRaw []byte) (int, error) {
 	if fldPkg, ok := m.Packager.Fields[0]; ok {
 		value, length, err := fldPkg.Unpack(messageRaw, 0)
 		if err != nil {
 			return 0, fmt.Errorf("unpack MTI: %w", err)
 		}
-
-		// Usamos SetField con el valor string, que creará un StringField por defecto
-		m.SetField(0, value)
-
+		if err := m.SetField(0, value); err != nil {
+			return 0, fmt.Errorf("unpack MTI: failed to set field: %w", err)
+		}
 		return length, nil
 	}
-
+	return 0, nil
 	return 0, ErrMTINotFoundInPackager
 }
 
-// unpackBitmap unpacks the bitmap from the message.
-// This is an internal helper method.
 func (m *Message) unpackBitmap(messageRaw []byte, offset int) (int, error) {
 	if fldPkg, ok := m.Packager.Fields[1]; ok {
 		bMap, length, err := bitmap.Unpack(fldPkg, messageRaw, offset)
@@ -338,8 +285,13 @@ func (m *Message) unpackBitmap(messageRaw []byte, offset int) (int, error) {
 		}
 
 		m.Bitmap = bMap
-		// Usamos SetField con los bytes del bitmap, que creará un BytesField por defecto
-		m.SetField(1, bMap.ToBytes())
+
+		if len(m.Bitmap.ToBytes()) > fldPkg.Length() {
+			err = m.SetField(1, bMap.ToBytes()[fldPkg.Length():])
+			if err != nil {
+				return 0, err
+			}
+		}
 
 		return length, nil
 	}
@@ -349,20 +301,18 @@ func (m *Message) unpackBitmap(messageRaw []byte, offset int) (int, error) {
 
 func (m *Message) unpackFields(messageRaw []byte, position int) error {
 	for _, fieldId := range m.Bitmap.GetSliceString() {
-		if fieldId != 0 && fieldId != 1 { // MTI y Bitmap ya desempaquetados
+		if fieldId != 0 && fieldId != 1 {
 			if fldPkg, ok := m.Packager.Fields[fieldId]; ok {
 				value, length, err := fldPkg.Unpack(messageRaw, position)
 				if err != nil {
 					return fmt.Errorf("unpack field %d: %w", fieldId, err)
 				}
 
-				// Obtenemos el Field existente o creamos uno por defecto
-				f, ok := m.fields[fieldId]
-				if !ok {
-					f = m.createField(fieldId)
+				f := m.createField(fieldId)
+				if err := f.Unparse(value); err != nil {
+					return fmt.Errorf("unpack field %d: failed to set bytes: %w", fieldId, err)
 				}
-				// Pasamos los bytes (convertidos a string) al SetBytes del Field
-				f.SetBytes([]byte(value))
+				m.fields[fieldId] = f
 				position += length
 			} else {
 				return fmt.Errorf("field %d: %w", fieldId, ErrNotFoundInPackager)
@@ -371,3 +321,37 @@ func (m *Message) unpackFields(messageRaw []byte, position int) error {
 	}
 	return nil
 }
+
+func (m *Message) Get() any { return m }
+
+func (m *Message) Set(v any) error {
+	val, ok := v.(*Message)
+	if !ok {
+		return fmt.Errorf("invalid type for Message field: received %T, expected *Message", v)
+	}
+	m.Packager = val.Packager
+	m.Length = val.Length
+	m.Header = val.Header
+	m.Trailer = val.Trailer
+	m.Bitmap = val.Bitmap
+	m.fields = val.fields
+	return nil
+}
+
+func (m *Message) Unparse(data string) error {
+	rawBytes, err := hex.DecodeString(data)
+	if err != nil {
+		return fmt.Errorf("invalid hex data for nested message: %w", err)
+	}
+	return m.Unpack(rawBytes)
+}
+
+func (m *Message) Parse() (string, error) {
+	packedBytes, err := m.Pack()
+	if err != nil {
+		return "", fmt.Errorf("failed to pack nested message: %w", err)
+	}
+	return hex.EncodeToString(packedBytes), nil
+}
+
+func (m *Message) Log() (interface{}, error) { return m.LogMsg(), nil }

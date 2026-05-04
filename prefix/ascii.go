@@ -16,19 +16,19 @@ type AsciiPrefixer struct {
 
 // ASCII provides pre-configured AsciiPrefixer instances for common length types.
 var ASCII = Prefixers{
-	L:      &AsciiPrefixer{1, &encoding.ASCII{}, false, false},
-	LL:     &AsciiPrefixer{2, &encoding.ASCII{}, false, false},
-	LLL:    &AsciiPrefixer{3, &encoding.ASCII{}, false, false},
-	LLLL:   &AsciiPrefixer{4, &encoding.ASCII{}, false, false},
-	LLLLL:  &AsciiPrefixer{5, &encoding.ASCII{}, false, false},
-	LLLLLL: &AsciiPrefixer{6, &encoding.ASCII{}, false, false},
+	L:      &AsciiPrefixer{1, &encoding.ASCII, false, false},
+	LL:     &AsciiPrefixer{2, &encoding.ASCII, false, false},
+	LLL:    &AsciiPrefixer{3, &encoding.ASCII, false, false},
+	LLLL:   &AsciiPrefixer{4, &encoding.ASCII, false, false},
+	LLLLL:  &AsciiPrefixer{5, &encoding.ASCII, false, false},
+	LLLLLL: &AsciiPrefixer{6, &encoding.ASCII, false, false},
 }
 
 // NewAsciiPrefixer creates a new AsciiPrefixer with the specified number of digits.
 // The `hex` parameter indicates if the length should be treated as hexadecimal.
 // The `isInclusive` parameter indicates if the encoded length includes the prefix's own length.
 func NewAsciiPrefixer(nDigits int, hex, isInclusive bool) Prefixer {
-	return &AsciiPrefixer{nDigits, &encoding.ASCII{}, hex, isInclusive}
+	return &AsciiPrefixer{nDigits, &encoding.ASCII, hex, isInclusive}
 }
 
 // EncodeLength encodes the given integer length into an ASCII byte slice.
@@ -77,4 +77,12 @@ func (p *AsciiPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 // GetPackedLength returns the number of ASCII digits used to encode the length.
 func (p *AsciiPrefixer) GetPackedLength() int {
 	return p.nDigits
+}
+
+func (p *AsciiPrefixer) IsHex() {
+	p.hex = true
+}
+
+func (p *AsciiPrefixer) IsInclusive() {
+	p.isInclusive = true
 }

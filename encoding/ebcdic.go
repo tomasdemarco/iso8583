@@ -75,30 +75,33 @@ var (
 		'\x38', '\x39', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'}
 )
 
-// EBCDIC implements the Encoder interface for EBCDIC encoding.
+// EbcdicEncoder implements the Encoder interface for EbcdicEncoder encoding.
 // It converts ASCII strings to EBCDIC byte slices and vice-versa using lookup tables.
-type EBCDIC struct {
+type EbcdicEncoder struct {
 	length int
 }
 
-// NewEbcdicEncoder creates a new EBCDIC encoder.
+var EBCDIC = EbcdicEncoder{}
+
+// NewEbcdicEncoder creates a new EbcdicEncoder encoder.
 func NewEbcdicEncoder() Encoder {
-	return &EBCDIC{}
+	return &EbcdicEncoder{}
 }
 
-// Encode converts an ASCII string to an EBCDIC byte slice.
+// Encode converts an ASCII string to an EbcdicEncoder byte slice.
 // It uses the asciiToEbcdic lookup table.
-func (e *EBCDIC) Encode(src string) ([]byte, error) {
+func (e *EbcdicEncoder) Encode(src string) ([]byte, error) {
 	var dst []byte
 	for _, v := range []byte(src) {
 		dst = append(dst, asciiToEbcdic[v])
 	}
+	e.length = len(dst)
 	return dst, nil
 }
 
-// Decode converts an EBCDIC byte slice to an ASCII string.
+// Decode converts an EbcdicEncoder byte slice to an ASCII string.
 // It reads up to the configured length and uses the ebcdicToAscii lookup table.
-func (e *EBCDIC) Decode(src []byte) (string, error) {
+func (e *EbcdicEncoder) Decode(src []byte) (string, error) {
 	if len(src) < e.length {
 		return "", fmt.Errorf("%w: expected %d, got %d", ErrNotEnoughDataToDecode, e.length, len(src))
 	}
@@ -111,7 +114,15 @@ func (e *EBCDIC) Decode(src []byte) (string, error) {
 	return string(dst), nil
 }
 
-// SetLength sets the length for the EBCDIC encoder.
-func (e *EBCDIC) SetLength(length int) {
+// SetLength sets the length for the EbcdicEncoder encoder.
+func (e *EbcdicEncoder) SetLength(length int) {
 	e.length = length
+}
+
+func (e *EbcdicEncoder) GetLength() int {
+	return e.length
+}
+
+func (e *EbcdicEncoder) GetType() Encoding {
+	return Ebcdic
 }

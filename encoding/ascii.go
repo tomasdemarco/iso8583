@@ -3,25 +3,28 @@ package encoding
 
 import "fmt"
 
-// ASCII implements the Encoder interface for ASCII encoding.
+// AsciiEncoder implements the Encoder interface for ASCII encoding.
 // It encodes and decodes strings directly to/from byte slices.
-type ASCII struct {
+type AsciiEncoder struct {
 	length int
 }
 
+var ASCII = AsciiEncoder{}
+
 // NewAsciiEncoder creates a new ASCII encoder.
 func NewAsciiEncoder() Encoder {
-	return &ASCII{}
+	return &AsciiEncoder{}
 }
 
 // Encode converts a string to an ASCII byte slice.
-func (e *ASCII) Encode(src string) ([]byte, error) {
+func (e *AsciiEncoder) Encode(src string) ([]byte, error) {
+	e.length = len([]byte(src))
 	return []byte(src), nil
 }
 
 // Decode converts an ASCII byte slice to a string.
 // It reads up to the configured length.
-func (e *ASCII) Decode(src []byte) (string, error) {
+func (e *AsciiEncoder) Decode(src []byte) (string, error) {
 	if len(src) < e.length {
 		return "", fmt.Errorf("%w: expected %d, got %d", ErrNotEnoughDataToDecode, e.length, len(src))
 	}
@@ -29,6 +32,14 @@ func (e *ASCII) Decode(src []byte) (string, error) {
 }
 
 // SetLength sets the length for the ASCII encoder.
-func (e *ASCII) SetLength(length int) {
+func (e *AsciiEncoder) SetLength(length int) {
 	e.length = length
+}
+
+func (e *AsciiEncoder) GetLength() int {
+	return e.length
+}
+
+func (e *AsciiEncoder) GetType() Encoding {
+	return Ascii
 }

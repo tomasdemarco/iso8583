@@ -27,12 +27,9 @@ func NewFillPadder(left bool, char string) Padder {
 	return &FillPadder{left, char}
 }
 
-// EncodePad calculates the left and right padding strings for fill padding.
+// Pack calculates the left and right padding strings for fill padding.
 // It returns the padding strings and an error if the value is too long for the field.
-func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
-	if _, ok := encoder.(*encoding.BCD); ok {
-		lengthPackager = lengthPackager * 2
-	}
+func (p *FillPadder) Pack(lengthPackager int, lengthValue int, encoder encoding.Encoder) (string, string, error) {
 	if lengthPackager < lengthValue {
 		return "", "", fmt.Errorf("%w: value %d, max %d", ErrValueTooLong, lengthValue, lengthPackager)
 	}
@@ -42,11 +39,15 @@ func (p *FillPadder) EncodePad(lengthPackager int, lengthValue int, encoder enco
 	return "", strings.Repeat(p.char, lengthPackager-lengthValue), nil
 }
 
-// DecodePad for FillPadder always returns 0, 0 as fill padding is removed by simply slicing.
-func (p *FillPadder) DecodePad(_ int) (int, int) {
+// Unpack for FillPadder always returns 0, 0 as fill padding is removed by simply slicing.
+func (p *FillPadder) Unpack(_ int) (int, int) {
 	return 0, 0
 }
 
 func (p *FillPadder) Type() Type {
 	return Fill
+}
+
+func (p *FillPadder) SetChar(char string) {
+	p.char = char
 }

@@ -31,7 +31,7 @@ func (f *TLVCustomField) SetValue(id int, value string) {
 	f.SubfieldValues[id] = value
 }
 
-// Pack implementa CustomPacker.Pack() para TLVCustomField.
+// Pack implementa CustomPacker.Parse() para TLVCustomField.
 func (f *TLVCustomField) Pack() (string, error) {
 	if f.SubPackager == nil {
 		return "", fmt.Errorf("TLVCustomField: SubPackager no inicializado para empaquetar")
@@ -64,7 +64,7 @@ func (f *TLVCustomField) Pack() (string, error) {
 	return hex.EncodeToString(packedBytesBuffer.Bytes()), nil
 }
 
-// Unpack implementa CustomPacker.Unpack() para TLVCustomField.
+// Unpack implementa CustomPacker.Unparse() para TLVCustomField.
 func (f *TLVCustomField) Unpack(data string) error {
 	if f.SubPackager == nil {
 		return fmt.Errorf("TLVCustomField: SubPackager no inicializado para desempaquetar")
@@ -85,7 +85,7 @@ func (f *TLVCustomField) Unpack(data string) error {
 	f.SubfieldValues = make(map[int]string)
 	// Cargamos los valores desempaquetados de nuevo a nuestro mapa
 	for _, id := range subMessage.Bitmap.GetSliceString() {
-		if subField, err := subMessage.Field(id).String(); err != nil { // Asegurarse de que el campo exista
+		if subField, err := subMessage.GetFieldString(id); err == nil { // Asegurarse de que el campo exista
 			f.SubfieldValues[id] = subField
 		}
 	}

@@ -11,6 +11,10 @@ type Prefixer interface {
 	DecodeLength(b []byte, offset int) (int, error)
 	// GetPackedLength returns the fixed number of bytes this prefixer uses to encode the length.
 	GetPackedLength() int
+
+	IsHex()
+
+	IsInclusive()
 }
 
 // Prefixers is a collection of common Prefixer implementations for various length types.

@@ -22,21 +22,21 @@ func TestUnpackEmv(t *testing.T) {
 
 	result, err := Unpack(value)
 	if err != nil {
-		t.Fatalf(`Unpack(%s) - Error %s`, value, err.Error())
+		t.Fatalf(`Unparse(%s) - Error %s`, value, err.Error())
 	}
 
 	if len(result) != len(resultExpected) {
-		t.Fatalf(`Unpack(%s) - Length tags is different - Result "%s" / Expected "%s"`, value, result, resultExpected)
+		t.Fatalf(`Unparse(%s) - Length tags is different - Result "%s" / Expected "%s"`, value, result, resultExpected)
 	}
 
 	for key, value1 := range result {
 		value2, ok := resultExpected[key]
 		if !ok || !reflect.DeepEqual(value1, value2) {
-			t.Fatalf(`Unpack(%s) - Result tags "%s" does not match "%s"`, value, result, resultExpected)
+			t.Fatalf(`Unparse(%s) - Result tags "%s" does not match "%s"`, value, result, resultExpected)
 		}
 	}
 
-	t.Logf(`Unpack(%s) - Result "%s" match "%s"`, value, result, resultExpected)
+	t.Logf(`Unparse(%s) - Result "%s" match "%s"`, value, result, resultExpected)
 }
 
 // TestUnpackEmv calls emv.Unpack
@@ -48,21 +48,21 @@ func TestUnpackEmvWithFilter(t *testing.T) {
 
 	result, err := Unpack(value, tagsWithFilter...)
 	if err != nil {
-		t.Fatalf(`Unpack(%s) - Error %s`, value, err.Error())
+		t.Fatalf(`Unparse(%s) - Error %s`, value, err.Error())
 	}
 
 	if len(result) != len(resultExpected) {
-		t.Fatalf(`Unpack(%s) - Length tags is different - Result "%s" / Expected "%s"`, value, result, resultExpected)
+		t.Fatalf(`Unparse(%s) - Length tags is different - Result "%s" / Expected "%s"`, value, result, resultExpected)
 	}
 
 	for key, value1 := range result {
 		value2, ok := resultExpected[key]
 		if !ok || !reflect.DeepEqual(value1, value2) {
-			t.Fatalf(`Unpack(%s) - Result tags "%s" does not match "%s"`, value, result, resultExpected)
+			t.Fatalf(`Unparse(%s) - Result tags "%s" does not match "%s"`, value, result, resultExpected)
 		}
 	}
 
-	t.Logf(`Unpack(%s) - Result "%s" match "%s"`, value, result, resultExpected)
+	t.Logf(`Unparse(%s) - Result "%s" match "%s"`, value, result, resultExpected)
 }
 
 // TestPackEmv calls emv.Pack
@@ -77,7 +77,7 @@ func TestPackEmv(t *testing.T) {
 	result := Pack(data)
 
 	if result != resultExpected {
-		t.Fatalf(`Pack(%s) - Result "%s" does not match "%s"`, data, result, resultExpected)
+		t.Fatalf(`Parse(%s) - Result "%s" does not match "%s"`, data, result, resultExpected)
 	}
-	t.Logf(`Pack(%s) - Result "%s" match "%s"`, data, result, resultExpected)
+	t.Logf(`Parse(%s) - Result "%s" match "%s"`, data, result, resultExpected)
 }
