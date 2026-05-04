@@ -20,7 +20,7 @@ func TestEncodersRoundTrip(t *testing.T) {
 		// --- ASCII Encoder ---
 		{
 			name:           "ASCII - 'Hello'",
-			encoder:        &ASCII{},
+			encoder:        &ASCII,
 			inputString:    "Hello",
 			expectedBytes:  []byte{0x48, 0x65, 0x6c, 0x6c, 0x6f},
 			expectedString: "Hello",
@@ -28,7 +28,7 @@ func TestEncodersRoundTrip(t *testing.T) {
 		},
 		{
 			name:           "ASCII - '123456'",
-			encoder:        &ASCII{},
+			encoder:        &ASCII,
 			inputString:    "123456",
 			expectedBytes:  []byte{0x31, 0x32, 0x33, 0x34, 0x35, 0x36},
 			expectedString: "123456",
@@ -36,7 +36,7 @@ func TestEncodersRoundTrip(t *testing.T) {
 		},
 		{
 			name:            "ASCII - Decode error (not enough data)",
-			encoder:         &ASCII{},
+			encoder:         &ASCII,
 			inputString:     "",
 			expectedBytes:   []byte{},
 			expectedString:  "",
@@ -100,7 +100,7 @@ func TestEncodersRoundTrip(t *testing.T) {
 		// --- EBCDIC Encoder (ejemplo simple) ---
 		{
 			name:           "EBCDIC - 'Hello'",
-			encoder:        &EBCDIC{},
+			encoder:        &EBCDIC,
 			inputString:    "Hello",
 			expectedBytes:  []byte{0xC8, 0x85, 0x93, 0x93, 0x96},
 			expectedString: "Hello",

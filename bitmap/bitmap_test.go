@@ -34,7 +34,7 @@ func TestUnpack(t *testing.T) {
 			expectError:    false,
 		},
 		{
-			name:           "Primary and Secondary Bitmap - Unpack Secondary Error",
+			name:           "Primary and Secondary Bitmap - Unparse Secondary Error",
 			packedBytes:    []byte{0xE8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 			expectedFields: nil,
 			expectedLength: 0,
@@ -46,14 +46,14 @@ func TestUnpack(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			bmap, _, err := Unpack(pkg.Fields[1], tc.packedBytes, 0)
 			if (err != nil) != tc.expectError {
-				t.Fatalf("Unpack() error = %v, wantErr %v", err, tc.expectError)
+				t.Fatalf("Unparse() error = %v, wantErr %v", err, tc.expectError)
 			}
 			if !tc.expectError {
 				if !reflect.DeepEqual(bmap.GetSliceString(), tc.expectedFields) {
-					t.Errorf("Unpack() fields = %v, want %v", bmap.GetSliceString(), tc.expectedFields)
+					t.Errorf("Unparse() fields = %v, want %v", bmap.GetSliceString(), tc.expectedFields)
 				}
 				if len(bmap.ToBytes()) != tc.expectedLength {
-					t.Errorf("Unpack() length = %d, want %d", len(bmap.ToBytes()), tc.expectedLength)
+					t.Errorf("Unparse() length = %d, want %d", len(bmap.ToBytes()), tc.expectedLength)
 				}
 			}
 		})

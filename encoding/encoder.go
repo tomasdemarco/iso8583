@@ -11,4 +11,7 @@ type Encoder interface {
 	Decode(src []byte) (string, error)
 	// SetLength sets the length for the encoder, which might be used during encoding or decoding.
 	SetLength(length int)
+	
+	GetLength() int
+	GetType() Encoding
 }

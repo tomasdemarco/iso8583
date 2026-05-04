@@ -12,5 +12,6 @@ type Packager struct {
 	Description string
 	Prefix      prefix.Prefixer
 	Header      HeaderPackager
+	Bitmap      FieldPackager
 	Fields      map[int]FieldPackager
 }

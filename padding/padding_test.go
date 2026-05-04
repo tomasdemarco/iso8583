@@ -10,7 +10,7 @@ import (
 func TestPaddersRoundTrip(t *testing.T) {
 	// Usamos un encoder ASCII simple para la mayoría de las pruebas.
 	// Para BCD, se usará un encoder BCD.
-	asciiEncoder := &encoding.ASCII{}
+	asciiEncoder := &encoding.ASCII
 	bcdEncoder := encoding.NewBcdEncoder(true) // Asumimos padLeft para BCD
 
 	testCases := []struct {
@@ -18,7 +18,7 @@ func TestPaddersRoundTrip(t *testing.T) {
 		padder           Padder
 		fieldLength      int              // Longitud total esperada del campo
 		dataLength       int              // Longitud de los datos sin padding
-		encoder          encoding.Encoder // Encoder para simular el comportamiento de EncodePad
+		encoder          encoding.Encoder // Encoder para simular el comportamiento de Parse
 		expectedLeftPad  int
 		expectedRightPad int
 		expectError      bool
@@ -123,7 +123,7 @@ func TestPaddersRoundTrip(t *testing.T) {
 		// --- NonePadder ---
 		{
 			name:             "NonePadder - No Pad",
-			padder:           NONE.NONE,
+			padder:           NONE,
 			fieldLength:      5,
 			dataLength:       5,
 			encoder:          asciiEncoder,
@@ -132,7 +132,7 @@ func TestPaddersRoundTrip(t *testing.T) {
 		},
 		{
 			name:        "NonePadder - Data too long (no error expected)",
-			padder:      NONE.NONE,
+			padder:      NONE,
 			fieldLength: 3,
 			dataLength:  5,
 			encoder:     asciiEncoder,
@@ -151,17 +151,17 @@ func TestPaddersRoundTrip(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// --- Test EncodePad ---
-			leftPadStr, rightPadStr, err := tc.padder.EncodePad(tc.fieldLength, tc.dataLength, tc.encoder)
+			// --- Test Parse ---
+			leftPadStr, rightPadStr, err := tc.padder.Pack(tc.fieldLength, tc.dataLength, tc.encoder)
 			if tc.expectError {
 				if err == nil {
-					t.Fatalf("EncodePad() esperaba un error, pero no lo obtuvo")
+					t.Fatalf("Parse() esperaba un error, pero no lo obtuvo")
 				}
 				return // Prueba de error finalizada
 			}
 
 			if err != nil {
-				t.Fatalf("EncodePad() falló: %v", err)
+				t.Fatalf("Parse() falló: %v", err)
 			}
 
 			// Convertir los strings de padding a int para la comparación
@@ -169,18 +169,18 @@ func TestPaddersRoundTrip(t *testing.T) {
 			rightPad := len(rightPadStr)
 
 			if leftPad != tc.expectedLeftPad || rightPad != tc.expectedRightPad {
-				t.Errorf("EncodePad() padding incorrecto. Esperado: (%d, %d), Recibido: (%d, %d)",
+				t.Errorf("Parse() padding incorrecto. Esperado: (%d, %d), Recibido: (%d, %d)",
 					tc.expectedLeftPad, tc.expectedRightPad, leftPad, rightPad)
 			}
 
-			// --- Test DecodePad ---
-			// Para DecodePad, la longitud de entrada es la longitud total del campo.
+			// --- Test Unparse ---
+			// Para Unparse, la longitud de entrada es la longitud total del campo.
 			// El resultado esperado es la cantidad de padding que se eliminaría.
-			decodedLeftPad, decodedRightPad := tc.padder.DecodePad(tc.fieldLength)
+			decodedLeftPad, decodedRightPad := tc.padder.Unpack(tc.fieldLength)
 
-			// La lógica de DecodePad es más simple, solo verifica si se debe quitar padding.
+			// La lógica de Unparse es más simple, solo verifica si se debe quitar padding.
 			// Para FillPadder, siempre es 0,0. Para ParityPadder, es 1,0 o 0,1 si la longitud es impar.
-			// Ajustamos la expectativa de DecodePad basándonos en el tipo de padder.
+			// Ajustamos la expectativa de Unparse basándonos en el tipo de padder.
 			var expectedDecodedLeftPad, expectedDecodedRightPad int
 			switch tc.padder.(type) {
 			case *FillPadder:
@@ -200,7 +200,7 @@ func TestPaddersRoundTrip(t *testing.T) {
 			}
 
 			if decodedLeftPad != expectedDecodedLeftPad || decodedRightPad != expectedDecodedRightPad {
-				t.Errorf("DecodePad() padding incorrecto. Esperado: (%d, %d), Recibido: (%d, %d)",
+				t.Errorf("Unparse() padding incorrecto. Esperado: (%d, %d), Recibido: (%d, %d)",
 					expectedDecodedLeftPad, expectedDecodedRightPad, decodedLeftPad, decodedRightPad)
 			}
 		})

@@ -13,6 +13,8 @@ import (
 
 // MockPrefixer implements the prefix.Prefixer interface for testing purposes.
 type MockPrefixer struct {
+	hex,
+	isInclusive bool
 	encodeFunc    func(lenMessage int) ([]byte, error)
 	decodeFunc    func(b []byte, offset int) (int, error)
 	getPackedFunc func() int
@@ -42,6 +44,14 @@ func (m *MockPrefixer) GetPackedLength() int {
 	return 1 // Default packed length
 }
 
+func (p *MockPrefixer) IsHex() {
+	p.hex = true
+}
+
+func (p *MockPrefixer) IsInclusive() {
+	p.isInclusive = true
+}
+
 func TestPack(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -51,7 +61,7 @@ func TestPack(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name: "Successful Pack",
+			name: "Successful Parse",
 			prefixer: &MockPrefixer{
 				encodeFunc: func(lenMessage int) ([]byte, error) {
 					return []byte{byte(lenMessage)}, nil
@@ -62,7 +72,7 @@ func TestPack(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			name: "Pack Error from Prefixer",
+			name: "Parse Error from Prefixer",
 			prefixer: &MockPrefixer{
 				encodeFunc: func(lenMessage int) ([]byte, error) {
 					return nil, errors.New("encoding error")
@@ -78,10 +88,10 @@ func TestPack(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := length.Pack(tt.prefixer, tt.lenMessage)
 			if !bytes.Equal(got, tt.expected) {
-				t.Errorf("Pack() got = %v, want %v", got, tt.expected)
+				t.Errorf("Parse() got = %v, want %v", got, tt.expected)
 			}
 			if (err != nil && tt.expectedErr == nil) || (err == nil && tt.expectedErr != nil) || (err != nil && tt.expectedErr != nil && err.Error() != tt.expectedErr.Error()) {
-				t.Errorf("Pack() error = %v, wantErr %v", err, tt.expectedErr)
+				t.Errorf("Parse() error = %v, wantErr %v", err, tt.expectedErr)
 			}
 		})
 	}
@@ -96,21 +106,21 @@ func TestUnpack(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name:        "Successful Unpack",
+			name:        "Successful Unparse",
 			reader:      bufio.NewReader(bytes.NewBuffer([]byte{10})),
 			prefixer:    &MockPrefixer{getPackedFunc: func() int { return 1 }},
 			expectedLen: 10,
 			expectedErr: nil,
 		},
 		{
-			name:        "Unpack EOF Error",
+			name:        "Unparse EOF Error",
 			reader:      bufio.NewReader(bytes.NewBuffer([]byte{})),
 			prefixer:    &MockPrefixer{getPackedFunc: func() int { return 1 }},
 			expectedLen: 0,
 			expectedErr: io.EOF,
 		},
 		{
-			name:   "Unpack Decode Error from Prefixer",
+			name:   "Unparse Decode Error from Prefixer",
 			reader: bufio.NewReader(bytes.NewBuffer([]byte{99})),
 			prefixer: &MockPrefixer{
 				getPackedFunc: func() int { return 1 },
@@ -127,10 +137,10 @@ func TestUnpack(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotLen, err := length.Unpack(tt.reader, tt.prefixer)
 			if gotLen != tt.expectedLen {
-				t.Errorf("Unpack() gotLen = %v, want %v", gotLen, tt.expectedLen)
+				t.Errorf("Unparse() gotLen = %v, want %v", gotLen, tt.expectedLen)
 			}
 			if (err != nil && tt.expectedErr == nil) || (err == nil && tt.expectedErr != nil) || (err != nil && tt.expectedErr != nil && err.Error() != tt.expectedErr.Error()) {
-				t.Errorf("Unpack() error = %v, wantErr %v", err, tt.expectedErr)
+				t.Errorf("Unparse() error = %v, wantErr %v", err, tt.expectedErr)
 			}
 		})
 	}

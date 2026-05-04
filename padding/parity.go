@@ -25,9 +25,9 @@ func NewParityPadder(left bool, char string) Padder {
 	return &ParityPadder{left, char}
 }
 
-// EncodePad calculates the left and right padding strings for parity padding.
+// Pack calculates the left and right padding strings for parity padding.
 // It adds one padding character if the value length is odd.
-func (p *ParityPadder) EncodePad(_, lengthValue int, _ encoding.Encoder) (string, string, error) {
+func (p *ParityPadder) Pack(_, lengthValue int, _ encoding.Encoder) (string, string, error) {
 	if lengthValue%2 != 0 {
 		if p.left {
 			return p.char, "", nil
@@ -38,9 +38,9 @@ func (p *ParityPadder) EncodePad(_, lengthValue int, _ encoding.Encoder) (string
 	return "", "", nil
 }
 
-// DecodePad calculates the number of characters to remove for parity padding.
+// Unpack calculates the number of characters to remove for parity padding.
 // It returns 1 for the appropriate side if the field length is odd, otherwise 0.
-func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
+func (p *ParityPadder) Unpack(lengthField int) (int, int) {
 	if lengthField%2 == 0 {
 		return 0, 0
 	}
@@ -53,4 +53,8 @@ func (p *ParityPadder) DecodePad(lengthField int) (int, int) {
 
 func (p *ParityPadder) Type() Type {
 	return Parity
+}
+
+func (p *ParityPadder) SetChar(char string) {
+	p.char = char
 }

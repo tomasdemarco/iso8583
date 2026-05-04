@@ -17,12 +17,12 @@ type BcdPrefixer struct {
 
 // BCD provides pre-configured BcdPrefixer instances for common length types.
 var BCD = Prefixers{
-	L:      &BcdPrefixer{2, &encoding.BCD{}, false, false},
-	LL:     &BcdPrefixer{2, &encoding.BCD{}, false, false},
-	LLL:    &BcdPrefixer{4, &encoding.BCD{}, false, false},
-	LLLL:   &BcdPrefixer{4, &encoding.BCD{}, false, false},
-	LLLLL:  &BcdPrefixer{6, &encoding.BCD{}, false, false},
-	LLLLLL: &BcdPrefixer{6, &encoding.BCD{}, false, false},
+	L:      &BcdPrefixer{2, &encoding.BCD, false, false},
+	LL:     &BcdPrefixer{2, &encoding.BCD, false, false},
+	LLL:    &BcdPrefixer{4, &encoding.BCD, false, false},
+	LLLL:   &BcdPrefixer{4, &encoding.BCD, false, false},
+	LLLLL:  &BcdPrefixer{6, &encoding.BCD, false, false},
+	LLLLLL: &BcdPrefixer{6, &encoding.BCD, false, false},
 }
 
 // NewBcdPrefixer creates a new BcdPrefixer with the specified number of digits.
@@ -53,7 +53,7 @@ func (p *BcdPrefixer) EncodeLength(length int) ([]byte, error) {
 // DecodeLength decodes a BCD length from the provided byte slice starting at the given offset.
 // It returns the decoded integer length and an error if decoding fails.
 func (p *BcdPrefixer) DecodeLength(b []byte, offset int) (int, error) {
-	p.encoder.SetLength(p.GetPackedLength())
+	p.encoder.SetLength(p.nDigits)
 
 	lengthString, err := p.encoder.Decode(b[offset:])
 	if err != nil {
@@ -79,4 +79,12 @@ func (p *BcdPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 // For BCD, this is (nDigits + 1) / 2.
 func (p *BcdPrefixer) GetPackedLength() int {
 	return (p.nDigits + 1) / 2
+}
+
+func (p *BcdPrefixer) IsHex() {
+	p.hex = true
+}
+
+func (p *BcdPrefixer) IsInclusive() {
+	p.isInclusive = true
 }

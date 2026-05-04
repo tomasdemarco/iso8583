@@ -36,7 +36,7 @@ func (f *BitmapCustomField) SetValue(id int, value string) {
 	f.InternalBitmap.Set(id) // Marca el subcampo como presente
 }
 
-// Pack implementa CustomPacker.Pack() para BitmapCustomField.
+// Pack implementa CustomPacker.Parse() para BitmapCustomField.
 func (f *BitmapCustomField) Pack() (string, error) {
 	if f.SubPackager == nil {
 		return "", fmt.Errorf("BitmapCustomField: SubPackager no inicializado para empaquetar")
@@ -84,7 +84,7 @@ func (f *BitmapCustomField) Pack() (string, error) {
 	return hex.EncodeToString(packedData.Bytes()), nil
 }
 
-// Unpack implementa CustomPacker.Unpack() para BitmapCustomField.
+// Unpack implementa CustomPacker.Unparse() para BitmapCustomField.
 func (f *BitmapCustomField) Unpack(fieldData string) error {
 	if f.SubPackager == nil {
 		return fmt.Errorf("BitmapCustomField: SubPackager no inicializado para desempaquetar")
@@ -119,7 +119,7 @@ func (f *BitmapCustomField) Unpack(fieldData string) error {
 		if id == 0 {
 			continue
 		}
-		if subField, err := subMessage.Field(id).String(); err != nil {
+		if subField, err := subMessage.GetFieldString(id); err == nil {
 			f.SubfieldValues[id] = subField
 		}
 	}

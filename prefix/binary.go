@@ -17,14 +17,14 @@ type BinaryPrefixer struct {
 
 // BINARY provides pre-configured BinaryPrefixer instances for common binary length types.
 var BINARY = BinaryPrefixers{
-	B:  &BinaryPrefixer{1, &encoding.BINARY{}, true, false},
-	BB: &BinaryPrefixer{2, &encoding.BINARY{}, true, false},
+	B:  &BinaryPrefixer{1, &encoding.BINARY, true, false},
+	BB: &BinaryPrefixer{2, &encoding.BINARY, true, false},
 }
 
 // NewBinaryPrefixer creates a new BinaryPrefixer with the specified number of bytes.
 // The `isInclusive` parameter indicates if the encoded length includes the prefix's own length.
 func NewBinaryPrefixer(nBytes int, isInclusive bool) Prefixer {
-	return &BinaryPrefixer{(nBytes + 1) / 2, &encoding.BINARY{}, true, isInclusive}
+	return &BinaryPrefixer{(nBytes + 1) / 2, &encoding.BINARY, true, isInclusive}
 }
 
 // EncodeLength encodes the given integer length into a binary byte slice.
@@ -73,4 +73,12 @@ func (p *BinaryPrefixer) DecodeLength(b []byte, offset int) (int, error) {
 // GetPackedLength returns the number of bytes used to encode the length.
 func (p *BinaryPrefixer) GetPackedLength() int {
 	return p.nBytes
+}
+
+func (p *BinaryPrefixer) IsHex() {
+	p.hex = true
+}
+
+func (p *BinaryPrefixer) IsInclusive() {
+	p.isInclusive = true
 }

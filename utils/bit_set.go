@@ -83,6 +83,17 @@ func (bs *BitSet) Get(idx int) bool {
 	return (bs.bytes[byteIndex] & (1 << (7 - bitInBytePos))) != 0
 }
 
+// Unset desactiva un bit en una posición específica (basada en 1).
+func (bs *BitSet) Unset(idx int) {
+	if idx <= 0 || idx > bs.size {
+		return
+	}
+	internalIdx := idx - 1
+	byteIndex := internalIdx / 8
+	bitInBytePos := uint(internalIdx % 8)
+	bs.bytes[byteIndex] &^= 1 << (7 - bitInBytePos) // Big-Endian
+}
+
 // ToBytes devuelve la representación en bytes del BitSet.
 func (bs *BitSet) ToBytes() []byte {
 	return bs.bytes
